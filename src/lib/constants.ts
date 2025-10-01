@@ -26,7 +26,7 @@ export const FORM_CONFIG = {
 
 // API configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
   ENDPOINTS: {
     PROJECTS: '/projects',
     COUNTRIES: 'https://restcountries.com/v3.1/all?fields=name,cca2,translations',
