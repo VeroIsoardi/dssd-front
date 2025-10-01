@@ -1,13 +1,14 @@
 import { UseFormReturn } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
+import { FormField } from "@/components/ui/form-field"
 import { ChevronRight } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { useCountries } from "@/hooks/useCountries"
+import { MESSAGES, FORM_CONFIG } from "@/lib/constants"
 
 interface BasicInfoStepProps {
   form: UseFormReturn<ProjectFormData>
@@ -24,42 +25,48 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
     <div className="space-y-6">
       <div className="text-lg font-semibold mb-4">Paso 1: Datos Generales del Proyecto</div>
       
-      <div className="space-y-2">
-        <Label htmlFor="name">Nombre del proyecto *</Label>
+      <FormField 
+        label="Nombre del proyecto" 
+        htmlFor="name" 
+        required 
+        error={errors.name?.message}
+      >
         <Input
           id="name"
-          placeholder="Ingrese el nombre del proyecto"
+          placeholder={MESSAGES.PLACEHOLDERS.PROJECT_NAME}
           {...register("name")}
           className={errors.name ? "border-destructive" : ""}
         />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
-      </div>
+      </FormField>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Descripción *</Label>
+      <FormField 
+        label="Descripción" 
+        htmlFor="description" 
+        required 
+        error={errors.description?.message}
+      >
         <Textarea
           id="description"
-          placeholder="Describe los objetivos y alcance del proyecto"
+          placeholder={MESSAGES.PLACEHOLDERS.PROJECT_DESCRIPTION}
           rows={4}
           {...register("description")}
           className={errors.description ? "border-destructive" : ""}
         />
-        {errors.description && (
-          <p className="text-sm text-destructive">{errors.description.message}</p>
-        )}
-      </div>
+      </FormField>
 
-      <div className="space-y-2">
-        <Label htmlFor="country">País *</Label>
+      <FormField 
+        label="País" 
+        htmlFor="country" 
+        required 
+        error={errors.country?.message}
+      >
         <Select
           value={selectedCountry}
           onValueChange={(value) => setValue("country", value)}
           disabled={isLoadingCountries}
         >
           <SelectTrigger className={errors.country ? "border-destructive" : ""}>
-            <SelectValue placeholder="Seleccione un país" />
+            <SelectValue placeholder={MESSAGES.PLACEHOLDERS.SELECT_COUNTRY} />
           </SelectTrigger>
           <SelectContent>
             {countries.map((country) => (
@@ -69,56 +76,52 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
             ))}
           </SelectContent>
         </Select>
-        {errors.country && (
-          <p className="text-sm text-destructive">{errors.country.message}</p>
-        )}
-      </div>
+      </FormField>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Fecha de inicio *</Label>
+        <FormField 
+          label="Fecha de inicio" 
+          required 
+          error={errors.startDate?.message}
+        >
           <DatePicker
             value={watch("startDate") ? new Date(watch("startDate")) : undefined}
             onChange={(date) => setValue("startDate", date ? date.toISOString().split('T')[0] : "")}
-            placeholder="Seleccionar fecha de inicio"
+            placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
             className={errors.startDate ? "border-destructive" : ""}
           />
-          {errors.startDate && (
-            <p className="text-sm text-destructive">{errors.startDate.message}</p>
-          )}
-        </div>
+        </FormField>
 
-        <div className="space-y-2">
-          <Label>Fecha de fin *</Label>
+        <FormField 
+          label="Fecha de fin" 
+          required 
+          error={errors.endDate?.message}
+        >
           <DatePicker
             value={watch("endDate") ? new Date(watch("endDate")) : undefined}
             onChange={(date) => setValue("endDate", date ? date.toISOString().split('T')[0] : "")}
-            placeholder="Seleccionar fecha de fin"
+            placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
             className={errors.endDate ? "border-destructive" : ""}
           />
-          {errors.endDate && (
-            <p className="text-sm text-destructive">{errors.endDate.message}</p>
-          )}
-        </div>
+        </FormField>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="budgetFile">Plan económico (archivo) *</Label>
+      <FormField 
+        label="Plan económico (archivo)" 
+        htmlFor="budgetFile" 
+        required 
+        error={typeof errors.budgetFile?.message === 'string' 
+          ? errors.budgetFile.message 
+          : errors.budgetFile?.message ? 'Debe seleccionar un archivo' : ''}
+      >
         <Input
           id="budgetFile"
           type="file"
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+          accept={FORM_CONFIG.FILE_UPLOAD.ACCEPTED_TYPES}
           {...register("budgetFile")}
           className={errors.budgetFile ? "border-destructive" : ""}
         />
-        {errors.budgetFile && (
-          <p className="text-sm text-destructive">
-            {typeof errors.budgetFile.message === 'string' 
-              ? errors.budgetFile.message 
-              : 'Debe seleccionar un archivo'}
-          </p>
-        )}
-      </div>
+      </FormField>
 
       <div className="flex justify-end">
         <Button type="button" onClick={onNext}>

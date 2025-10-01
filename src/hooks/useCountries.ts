@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Country, CountryOption } from "@/types/project"
+import { API_CONFIG } from "@/lib/constants"
 
 const FALLBACK_COUNTRIES = [
   { value: "ar", label: "Argentina" },
@@ -20,7 +21,7 @@ export function useCountries() {
     const fetchCountries = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,translations')
+        const response = await fetch(API_CONFIG.ENDPOINTS.COUNTRIES)
         
         if (!response.ok) {
           throw new Error('Failed to fetch countries')

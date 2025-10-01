@@ -6,8 +6,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DatePicker } from "@/components/ui/date-picker"
+import { ErrorMessage } from "@/components/ui/error-message"
+import { FormField } from "@/components/ui/form-field"
 import { ChevronLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
+import { MESSAGES } from "@/lib/constants"
 
 interface TasksStepProps {
   form: UseFormReturn<ProjectFormData>
@@ -59,72 +62,67 @@ export function TasksStep({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor={`tasks.${index}.name`}>Nombre de la tarea *</Label>
+                <FormField 
+                  label="Nombre de la tarea" 
+                  htmlFor={`tasks.${index}.name`} 
+                  required 
+                  error={errors.tasks?.[index]?.name?.message}
+                >
                   <Input
                     {...register(`tasks.${index}.name`)}
-                    placeholder="Nombre de la tarea"
+                    placeholder={MESSAGES.PLACEHOLDERS.TASK_NAME}
                     className={errors.tasks?.[index]?.name ? "border-destructive" : ""}
                   />
-                  {errors.tasks?.[index]?.name && (
-                    <p className="text-sm text-destructive">
-                      {errors.tasks[index]?.name?.message}
-                    </p>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="space-y-2 md:col-span-1">
-                  <Label htmlFor={`tasks.${index}.description`}>Descripción *</Label>
+                <FormField 
+                  label="Descripción" 
+                  htmlFor={`tasks.${index}.description`} 
+                  required 
+                  error={errors.tasks?.[index]?.description?.message}
+                  className="md:col-span-1"
+                >
                   <Textarea
                     {...register(`tasks.${index}.description`)}
-                    placeholder="Descripción de la tarea"
+                    placeholder={MESSAGES.PLACEHOLDERS.TASK_DESCRIPTION}
                     rows={2}
                     className={errors.tasks?.[index]?.description ? "border-destructive" : ""}
                   />
-                  {errors.tasks?.[index]?.description && (
-                    <p className="text-sm text-destructive">
-                      {errors.tasks[index]?.description?.message}
-                    </p>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="space-y-2">
-                  <Label>Fecha de inicio *</Label>
+                <FormField 
+                  label="Fecha de inicio" 
+                  required 
+                  error={errors.tasks?.[index]?.startDate?.message}
+                >
                   <DatePicker
                     value={watch(`tasks.${index}.startDate`) ? new Date(watch(`tasks.${index}.startDate`)) : undefined}
                     onChange={(date) => setValue(`tasks.${index}.startDate`, date ? date.toISOString().split('T')[0] : "")}
-                    placeholder="Seleccionar fecha de inicio"
+                    placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
                     className={errors.tasks?.[index]?.startDate ? "border-destructive" : ""}
                   />
-                  {errors.tasks?.[index]?.startDate && (
-                    <p className="text-sm text-destructive">
-                      {errors.tasks[index]?.startDate?.message}
-                    </p>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="space-y-2">
-                  <Label>Fecha de fin *</Label>
+                <FormField 
+                  label="Fecha de fin" 
+                  required 
+                  error={errors.tasks?.[index]?.endDate?.message}
+                >
                   <DatePicker
                     value={watch(`tasks.${index}.endDate`) ? new Date(watch(`tasks.${index}.endDate`)) : undefined}
                     onChange={(date) => setValue(`tasks.${index}.endDate`, date ? date.toISOString().split('T')[0] : "")}
-                    placeholder="Seleccionar fecha de fin"
+                    placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
                     className={errors.tasks?.[index]?.endDate ? "border-destructive" : ""}
                   />
-                  {errors.tasks?.[index]?.endDate && (
-                    <p className="text-sm text-destructive">
-                      {errors.tasks[index]?.endDate?.message}
-                    </p>
-                  )}
-                </div>
+                </FormField>
               </div>
             </Card>
           ))}
         </div>
 
-        {errors.tasks && typeof errors.tasks.message === 'string' && (
-          <p className="text-sm text-destructive">{errors.tasks.message}</p>
-        )}
+        <ErrorMessage>
+          {typeof errors.tasks?.message === 'string' ? errors.tasks.message : ''}
+        </ErrorMessage>
       </div>
 
       <div className="flex justify-between">

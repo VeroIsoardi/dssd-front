@@ -22,15 +22,8 @@ export interface FileInfo {
   type: string
 }
 
-export interface ProjectFormData {
-  name: string
-  description: string
-  country: string
-  startDate: string
-  endDate: string
-  budgetFile: FileList | FileInfo | null
-  tasks: Task[]
-}
+import type { ProjectFormData } from "@/lib/validations/project"
+export type { ProjectFormData }
 
 export interface ProjectFormProps {
   onSubmit?: (data: ProjectFormData) => void

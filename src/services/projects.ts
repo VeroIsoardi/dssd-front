@@ -1,11 +1,19 @@
 import { Project, ProjectFormData } from "@/types/project"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+import { extractFileInfo } from "@/lib/utils/file"
+import { API_CONFIG, MESSAGES } from "@/lib/constants"
 
 export interface CreateProjectResponse {
   success: boolean
   data: Project
   message?: string
+}
+
+export interface GetProjectsResponse {
+  success: boolean
+  data: Project[]
+  total: number
+  page: number
+  limit: number
 }
 
 export interface ApiError {
@@ -40,15 +48,11 @@ export async function createProject(
       country: data.country,
       startDate: data.startDate,
       endDate: data.endDate,
-      budgetFile: data.budgetFile ? {
-        name: data.budgetFile instanceof FileList ? data.budgetFile[0]?.name : data.budgetFile.name,
-        size: data.budgetFile instanceof FileList ? data.budgetFile[0]?.size : data.budgetFile.size,
-        type: data.budgetFile instanceof FileList ? data.budgetFile[0]?.type : data.budgetFile.type,
-      } : null,
+      budgetFile: extractFileInfo(data.budgetFile),
       tasks: data.tasks
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROJECTS}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -57,12 +61,12 @@ export async function createProject(
     })
 
     if (!response.ok) {
-      let errorMessage = 'Error al crear el proyecto'
+      let errorMessage: string = MESSAGES.ERROR.PROJECT_CREATE_FAILED
       let errorDetails: ApiError | undefined
 
       try {
         errorDetails = await response.json()
-        errorMessage = errorDetails?.message || errorMessage
+        errorMessage = errorDetails?.message || MESSAGES.ERROR.PROJECT_CREATE_FAILED
       } catch {
         errorMessage = `Error ${response.status}: ${response.statusText}`
       }
@@ -83,13 +87,13 @@ export async function createProject(
 
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new ProjectApiError(
-        'No se pudo conectar con el servidor. Verifique su conexión a internet.',
+        MESSAGES.ERROR.NETWORK_ERROR,
         0
       )
     }
 
     throw new ProjectApiError(
-      'Error inesperado al crear el proyecto',
+      MESSAGES.ERROR.PROJECT_CREATE_FAILED,
       500
     )
   }
