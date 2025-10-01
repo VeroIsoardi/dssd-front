@@ -35,3 +35,18 @@ export interface ProjectFormData {
 export interface ProjectFormProps {
   onSubmit?: (data: ProjectFormData) => void
 }
+
+export interface Project {
+  id: string
+  name: string
+  description: string
+  country: string
+  startDate: string
+  endDate: string
+  budgetFile?: FileInfo | null
+  tasks: Task[]
+  status: 'draft' | 'active' | 'completed' | 'cancelled'
+  createdAt: string
+  updatedAt: string
+  userId: string
+}
