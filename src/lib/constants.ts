@@ -55,6 +55,8 @@ export const MESSAGES = {
   },
   
   PLACEHOLDERS: {
+    ONG_NAME: 'Ingrese el nombre de la ONG',
+    ONG_MAIL: 'Ingrese el email de la ONG',
     PROJECT_NAME: 'Ingrese el nombre del proyecto',
     PROJECT_DESCRIPTION: 'Describe los objetivos y alcance del proyecto',
     TASK_NAME: 'Nombre de la tarea',

@@ -15,6 +15,8 @@ export const taskSchema = z.object({
 })
 
 export const projectFormSchema = z.object({
+  ongName: z.string().min(1, "El nombre de la ONG es obligatorio"),
+  ongMail: z.string().min(1, "El email de la ONG es obligatorio").email("Debe ser un email válido"),
   name: z.string().min(1, "El nombre del proyecto es obligatorio"),
   description: z.string().min(1, "La descripción es obligatoria"),
   country: z.string().min(1, "Debe seleccionar un país"),

@@ -25,6 +25,37 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
     <div className="space-y-6">
       <div className="text-lg font-semibold mb-4">Paso 1: Datos Generales del Proyecto</div>
       
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField 
+          label="Nombre de la ONG" 
+          htmlFor="ongName" 
+          required 
+          error={errors.ongName?.message}
+        >
+          <Input
+            id="ongName"
+            placeholder={MESSAGES.PLACEHOLDERS.ONG_NAME}
+            {...register("ongName")}
+            className={errors.ongName ? "border-destructive" : ""}
+          />
+        </FormField>
+
+        <FormField 
+          label="Mail de la ONG" 
+          htmlFor="ongMail" 
+          required 
+          error={errors.ongMail?.message}
+        >
+          <Input
+            id="ongMail"
+            type="email"
+            placeholder={MESSAGES.PLACEHOLDERS.ONG_MAIL}
+            {...register("ongMail")}
+            className={errors.ongMail ? "border-destructive" : ""}
+          />
+        </FormField>
+      </div>
+      
       <FormField 
         label="Nombre del proyecto" 
         htmlFor="name" 

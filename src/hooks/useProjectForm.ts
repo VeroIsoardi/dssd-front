@@ -56,7 +56,7 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
 
   const nextStep = useCallback(async () => {
     if (currentStep === 1) {
-      const isValid = await form.trigger(['name', 'description', 'country', 'startDate', 'endDate', 'budgetFile'])
+      const isValid = await form.trigger(['ongName', 'ongMail', 'name', 'description', 'country', 'startDate', 'endDate', 'budgetFile'])
       if (isValid) {
         setCurrentStep(2)
       }

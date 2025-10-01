@@ -43,6 +43,8 @@ export async function createProject(
 ): Promise<Project> {
   try {
     const payload = {
+      ongName: data.ongName,
+      ongMail: data.ongMail,
       name: data.name,
       description: data.description,
       country: data.country,
