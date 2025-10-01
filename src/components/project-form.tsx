@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { ProjectFormProps, Country } from "@/types/project"
 
 const taskSchema = z.object({
   name: z.string().min(1, "El nombre de la tarea es obligatorio"),
@@ -48,15 +49,21 @@ const projectFormSchema = z.object({
 
 type ProjectFormData = z.infer<typeof projectFormSchema>
 
-interface Country {
-  cca2: string
-  name: { common: string }
-  translations?: { spa?: { common: string } }
-}
+const FALLBACK_COUNTRIES = [
+  { value: "ar", label: "Argentina" },
+  { value: "br", label: "Brasil" },
+  { value: "cl", label: "Chile" },
+  { value: "uy", label: "Uruguay" },
+  { value: "es", label: "España" },
+  { value: "mx", label: "México" },
+  { value: "co", label: "Colombia" },
+  { value: "pe", label: "Perú" },
+]
 
-interface ProjectFormProps {
-  onSubmit?: (data: ProjectFormData) => void
-}
+const STEP_CONFIG = {
+  1: { title: "Paso 1", subtitle: "Datos Generales" },
+  2: { title: "Paso 2", subtitle: "Plan de Trabajo" },
+} as const
 
 export function ProjectForm({ onSubmit }: ProjectFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -86,23 +93,16 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
 
   const selectedCountry = watch("country")
 
-  // Fetch countries from REST Countries API
   useEffect(() => {
     const fetchCountries = async () => {
       try {
         setIsLoadingCountries(true)
         const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,translations')
-        const data: Array<{
-          cca2: string
-          name: { common: string }
-          translations?: { spa?: { common: string } }
-        }> = await response.json()
+        const data: Country[] = await response.json()
         
-        // Sort countries alphabetically and format for select with Spanish names
         const formattedCountries = data
           .map(country => ({
             value: country.cca2.toLowerCase(),
-            // Use Spanish translation if available, otherwise fallback to common name
             label: country.translations?.spa?.common || country.name.common
           }))
           .sort((a, b) => a.label.localeCompare(b.label, 'es'))
@@ -110,17 +110,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
         setCountries(formattedCountries)
       } catch (error) {
         console.error('Error fetching countries:', error)
-        // Fallback to some countries if API fails (in Spanish)
-        setCountries([
-          { value: "ar", label: "Argentina" },
-          { value: "br", label: "Brasil" },
-          { value: "cl", label: "Chile" },
-          { value: "uy", label: "Uruguay" },
-          { value: "es", label: "España" },
-          { value: "mx", label: "México" },
-          { value: "co", label: "Colombia" },
-          { value: "pe", label: "Perú" },
-        ])
+        setCountries(FALLBACK_COUNTRIES)
       } finally {
         setIsLoadingCountries(false)
       }
@@ -133,10 +123,8 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
     setIsLoading(true)
     
     try {
-      // Simular llamada a API
       await new Promise((resolve) => setTimeout(resolve, 2000))
       
-      // Obtener información del archivo
       const file = data.budgetFile[0]
       const projectData = {
         ...data,
@@ -164,10 +152,8 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
     }
   }
 
-  // Funciones de navegación del wizard
   const goToNextStep = async () => {
     if (currentStep === 1) {
-      // Validar solo los campos del paso 1
       const isStep1Valid = await trigger(['name', 'description', 'country', 'startDate', 'endDate', 'budgetFile'])
       if (isStep1Valid) {
         setCurrentStep(2)
@@ -181,7 +167,6 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
     }
   }
 
-  // Funciones para manejar tareas
   const addTask = () => {
     append({ name: "", description: "", startDate: "", endDate: "" })
   }
@@ -200,7 +185,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
           Complete el formulario para dar de alta un nuevo proyecto de ONG
         </CardDescription>
         
-        {/* Indicador de pasos */}
+
         <div className="flex items-center justify-between mt-6 px-4">
           <div className={`flex items-center space-x-3 ${currentStep === 1 ? 'text-primary' : 'text-muted-foreground'}`}>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -209,8 +194,8 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
               1
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-sm">Paso 1</span>
-              <span className="text-xs">Datos Generales</span>
+              <span className="font-semibold text-sm">{STEP_CONFIG[1].title}</span>
+              <span className="text-xs">{STEP_CONFIG[1].subtitle}</span>
             </div>
           </div>
           
@@ -220,8 +205,8 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
           
           <div className={`flex items-center space-x-3 ${currentStep === 2 ? 'text-primary' : 'text-muted-foreground'}`}>
             <div className="flex flex-col text-right">
-              <span className="font-semibold text-sm">Paso 2</span>
-              <span className="text-xs">Plan de Trabajo</span>
+              <span className="font-semibold text-sm">{STEP_CONFIG[2].title}</span>
+              <span className="text-xs">{STEP_CONFIG[2].subtitle}</span>
             </div>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
               currentStep === 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
@@ -234,12 +219,12 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
       
       <CardContent>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {/* Paso 1: Datos Generales */}
+
           {currentStep === 1 && (
             <div className="space-y-6">
-              <div className="text-lg font-semibold mb-4">Paso 1: Datos Generales del Proyecto</div>
+              <div className="text-lg font-semibold mb-4">{STEP_CONFIG[1].title}: {STEP_CONFIG[1].subtitle} del Proyecto</div>
               
-              {/* Nombre del proyecto */}
+
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre del proyecto *</Label>
                 <Input
@@ -253,7 +238,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 )}
               </div>
 
-              {/* Descripción */}
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descripción *</Label>
                 <Textarea
@@ -268,7 +253,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 )}
               </div>
 
-              {/* País */}
+
               <div className="space-y-2">
                 <Label htmlFor="country">País *</Label>
                 <Select
@@ -303,7 +288,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 )}
               </div>
 
-              {/* Fechas */}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="startDate">Fecha de inicio *</Label>
@@ -332,7 +317,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 </div>
               </div>
 
-              {/* Plan económico */}
+
               <div className="space-y-2">
                 <Label htmlFor="budgetFile">Plan económico (archivo) *</Label>
                 <Input
@@ -354,7 +339,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 )}
               </div>
 
-              {/* Botón siguiente */}
+
               <div className="flex justify-end">
                 <Button type="button" onClick={goToNextStep}>
                   Siguiente <ChevronRight className="ml-2 h-4 w-4" />
@@ -363,10 +348,10 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
             </div>
           )}
 
-          {/* Paso 2: Plan de Trabajo */}
+
           {currentStep === 2 && (
             <div className="space-y-6">
-              <div className="text-lg font-semibold mb-4">Paso 2: Plan de Trabajo</div>
+              <div className="text-lg font-semibold mb-4">{STEP_CONFIG[2].title}: {STEP_CONFIG[2].subtitle}</div>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -377,7 +362,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                   </Button>
                 </div>
 
-                {/* Lista de tareas */}
+
                 <div className="space-y-4">
                   {fields.map((field, index) => (
                     <Card key={field.id} className="p-4">
@@ -457,13 +442,13 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                   ))}
                 </div>
 
-                {/* Error de tareas mínimas */}
+
                 {errors.tasks && typeof errors.tasks.message === 'string' && (
                   <p className="text-sm text-destructive">{errors.tasks.message}</p>
                 )}
               </div>
 
-              {/* Botones de navegación */}
+
               <div className="flex justify-between">
                 <Button type="button" onClick={goToPreviousStep} variant="outline">
                   <ChevronLeft className="mr-2 h-4 w-4" />

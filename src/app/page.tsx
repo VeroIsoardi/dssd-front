@@ -1,23 +1,7 @@
 "use client"
 
 import { ProjectForm } from "@/components/project-form"
-
-interface Task {
-  name: string
-  description: string
-  startDate: string
-  endDate: string
-}
-
-interface ProjectFormData {
-  name: string
-  description: string
-  country: string
-  startDate: string
-  endDate: string
-  budgetFile: FileList | { name: string; size: number; type: string } | null
-  tasks: Task[]
-}
+import { ProjectFormData } from "@/types/project"
 
 export default function Home() {
   const handleProjectSubmit = (projectData: ProjectFormData) => {
