@@ -33,6 +33,18 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
       
       toast.success("¡Proyecto creado exitosamente!", { description: '' })
       
+      form.reset({
+        ongName: "",
+        ongMail: "",
+        name: "",
+        description: "",
+        country: "",
+        startDate: "",
+        endDate: "",
+        tasks: [DEFAULT_TASK]
+      })
+      setCurrentStep(1)
+      
       onSuccess?.(data)
       
     } catch (error) {
@@ -50,7 +62,7 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
     } finally {
       setIsLoading(false)
     }
-  }, [onSuccess])
+  }, [onSuccess, form])
 
   const nextStep = useCallback(async () => {
     if (currentStep === 1) {
