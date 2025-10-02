@@ -31,9 +31,7 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
       
       console.log("Proyecto creado:", project)
       
-      toast.success("¡Proyecto creado exitosamente!", {
-        description: `El proyecto "${project.name}" ha sido creado correctamente.`
-      })
+      toast.success("¡Proyecto creado exitosamente!", { description: '' })
       
       onSuccess?.(data)
       
@@ -56,7 +54,7 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
 
   const nextStep = useCallback(async () => {
     if (currentStep === 1) {
-      const isValid = await form.trigger(['ongName', 'ongMail', 'name', 'description', 'country', 'startDate', 'endDate', 'budgetFile'])
+      const isValid = await form.trigger(['ongName', 'ongMail', 'name', 'description', 'country', 'startDate', 'endDate'])
       if (isValid) {
         setCurrentStep(2)
       }

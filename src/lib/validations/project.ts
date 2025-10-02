@@ -22,7 +22,6 @@ export const projectFormSchema = z.object({
   country: z.string().min(1, "Debe seleccionar un país"),
   startDate: z.string().min(1, "La fecha de inicio es obligatoria"),
   endDate: z.string().min(1, "La fecha de fin es obligatoria"),
-  budgetFile: z.any().refine((files) => files?.length > 0, "Debe seleccionar un archivo del plan económico"),
   tasks: z.array(taskSchema).min(1, "Debe agregar al menos una tarea al plan de trabajo"),
 }).refine((data) => {
   const startDate = new Date(data.startDate)

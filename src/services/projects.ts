@@ -1,5 +1,4 @@
 import { Project, ProjectFormData } from "@/types/project"
-import { extractFileInfo } from "@/lib/utils/file"
 import { API_CONFIG, MESSAGES } from "@/lib/constants"
 
 export interface CreateProjectResponse {
@@ -50,7 +49,6 @@ export async function createProject(
       country: data.country,
       startDate: data.startDate,
       endDate: data.endDate,
-      budgetFile: extractFileInfo(data.budgetFile),
       tasks: data.tasks
     }
 

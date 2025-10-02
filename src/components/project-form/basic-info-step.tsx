@@ -8,7 +8,7 @@ import { FormField } from "@/components/ui/form-field"
 import { ChevronRight } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { useCountries } from "@/hooks/useCountries"
-import { MESSAGES, FORM_CONFIG } from "@/lib/constants"
+import { MESSAGES } from "@/lib/constants"
 
 interface BasicInfoStepProps {
   form: UseFormReturn<ProjectFormData>
@@ -136,23 +136,6 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
           />
         </FormField>
       </div>
-
-      <FormField 
-        label="Plan económico (archivo)" 
-        htmlFor="budgetFile" 
-        required 
-        error={typeof errors.budgetFile?.message === 'string' 
-          ? errors.budgetFile.message 
-          : errors.budgetFile?.message ? 'Debe seleccionar un archivo' : ''}
-      >
-        <Input
-          id="budgetFile"
-          type="file"
-          accept={FORM_CONFIG.FILE_UPLOAD.ACCEPTED_TYPES}
-          {...register("budgetFile")}
-          className={errors.budgetFile ? "border-destructive" : ""}
-        />
-      </FormField>
 
       <div className="flex justify-end">
         <Button type="button" onClick={onNext}>

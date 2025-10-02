@@ -4,12 +4,6 @@ export const FORM_CONFIG = {
     1: { title: "Paso 1", subtitle: "Datos Generales" },
     2: { title: "Paso 2", subtitle: "Plan de Trabajo" },
   } as const,
-  
-  FILE_UPLOAD: {
-    ACCEPTED_TYPES: ".pdf,.doc,.docx,.xls,.xlsx,.txt",
-    MAX_SIZE_MB: 10,
-    ALLOWED_EXTENSIONS: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'],
-  },
 
   VALIDATION: {
     MIN_TASKS: 1,
@@ -49,8 +43,6 @@ export const MESSAGES = {
     PROJECT_FETCH_FAILED: 'Error al obtener los proyectos',
     NETWORK_ERROR: 'No se pudo conectar con el servidor. Verifique su conexión a internet.',
     UNEXPECTED_ERROR: 'Ocurrió un error inesperado. Inténtelo nuevamente.',
-    FILE_TYPE_INVALID: 'Tipo de archivo no válido',
-    FILE_SIZE_EXCEEDED: 'El archivo excede el tamaño máximo permitido',
     COUNTRIES_FETCH_FAILED: 'Error al obtener la lista de países',
   },
   

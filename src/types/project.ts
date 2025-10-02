@@ -16,12 +16,6 @@ export interface CountryOption {
   label: string
 }
 
-export interface FileInfo {
-  name: string
-  size: number
-  type: string
-}
-
 import type { ProjectFormData } from "@/lib/validations/project"
 export type { ProjectFormData }
 
@@ -36,7 +30,6 @@ export interface Project {
   country: string
   startDate: string
   endDate: string
-  budgetFile?: FileInfo | null
   tasks: Task[]
   status: 'draft' | 'active' | 'completed' | 'cancelled'
   createdAt: string
