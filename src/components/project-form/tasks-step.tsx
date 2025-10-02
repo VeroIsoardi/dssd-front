@@ -11,6 +11,7 @@ import { FormField } from "@/components/ui/form-field"
 import { ChevronLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { MESSAGES } from "@/lib/constants"
+import { formatDateForInput, parseDateFromInput } from "@/lib/utils/date"
 
 interface TasksStepProps {
   form: UseFormReturn<ProjectFormData>
@@ -96,8 +97,8 @@ export function TasksStep({
                   error={errors.tasks?.[index]?.startDate?.message}
                 >
                   <DatePicker
-                    value={watch(`tasks.${index}.startDate`) ? new Date(watch(`tasks.${index}.startDate`)) : undefined}
-                    onChange={(date) => setValue(`tasks.${index}.startDate`, date ? date.toISOString().split('T')[0] : "")}
+                    value={watch(`tasks.${index}.startDate`) ? parseDateFromInput(watch(`tasks.${index}.startDate`)) : undefined}
+                    onChange={(date) => setValue(`tasks.${index}.startDate`, date ? formatDateForInput(date) : "")}
                     placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
                     className={errors.tasks?.[index]?.startDate ? "border-destructive" : ""}
                   />
@@ -109,8 +110,8 @@ export function TasksStep({
                   error={errors.tasks?.[index]?.endDate?.message}
                 >
                   <DatePicker
-                    value={watch(`tasks.${index}.endDate`) ? new Date(watch(`tasks.${index}.endDate`)) : undefined}
-                    onChange={(date) => setValue(`tasks.${index}.endDate`, date ? date.toISOString().split('T')[0] : "")}
+                    value={watch(`tasks.${index}.endDate`) ? parseDateFromInput(watch(`tasks.${index}.endDate`)) : undefined}
+                    onChange={(date) => setValue(`tasks.${index}.endDate`, date ? formatDateForInput(date) : "")}
                     placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
                     className={errors.tasks?.[index]?.endDate ? "border-destructive" : ""}
                   />

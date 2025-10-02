@@ -14,6 +14,13 @@ export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
+      ongName: "",
+      ongMail: "",
+      name: "",
+      description: "",
+      country: "",
+      startDate: "",
+      endDate: "",
       tasks: [DEFAULT_TASK]
     }
   })

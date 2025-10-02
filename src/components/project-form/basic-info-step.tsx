@@ -9,6 +9,7 @@ import { ChevronRight } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { useCountries } from "@/hooks/useCountries"
 import { MESSAGES } from "@/lib/constants"
+import { formatDateForInput, parseDateFromInput } from "@/lib/utils/date"
 
 interface BasicInfoStepProps {
   form: UseFormReturn<ProjectFormData>
@@ -116,8 +117,8 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
           error={errors.startDate?.message}
         >
           <DatePicker
-            value={watch("startDate") ? new Date(watch("startDate")) : undefined}
-            onChange={(date) => setValue("startDate", date ? date.toISOString().split('T')[0] : "")}
+            value={watch("startDate") ? parseDateFromInput(watch("startDate")) : undefined}
+            onChange={(date) => setValue("startDate", date ? formatDateForInput(date) : "")}
             placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
             className={errors.startDate ? "border-destructive" : ""}
           />
@@ -129,8 +130,8 @@ export function BasicInfoStep({ form, onNext }: BasicInfoStepProps) {
           error={errors.endDate?.message}
         >
           <DatePicker
-            value={watch("endDate") ? new Date(watch("endDate")) : undefined}
-            onChange={(date) => setValue("endDate", date ? date.toISOString().split('T')[0] : "")}
+            value={watch("endDate") ? parseDateFromInput(watch("endDate")) : undefined}
+            onChange={(date) => setValue("endDate", date ? formatDateForInput(date) : "")}
             placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
             className={errors.endDate ? "border-destructive" : ""}
           />
