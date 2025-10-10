@@ -1,5 +1,5 @@
-import RegisterComponent from '@/components/register/page'
+import RegisterForm from '@/components/auth/RegisterForm'
 
-export default function RegisterPageRoute() {
-  return <RegisterComponent />
+export default function RegisterPage() {
+  return <RegisterForm />
 }

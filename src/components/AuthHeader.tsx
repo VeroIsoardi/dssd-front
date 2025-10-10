@@ -11,7 +11,7 @@ export function AuthHeader() {
   if (user) {
     return (
       <div className="flex items-center gap-4">
-        <span className="text-sm">{user.name ?? user.email}</span>
+        <span className="text-sm">{user.firstName} {user.lastName}</span>
         <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
       </div>
     )
@@ -19,8 +19,8 @@ export function AuthHeader() {
 
   return (
     <div className="flex items-center gap-4">
-      <Link href="/login">Login</Link>
-      <Link href="/register">Register</Link>
+      <Link href="/login">Iniciar sesión</Link>
+      {/* <Link href="/register">Register</Link> */}
     </div>
   )
 }

@@ -1,16 +1,17 @@
 export interface AuthResponse {
-  accessToken: string
-  refreshToken?: string
+  token: string
   user: {
     id: string
-    name: string
     email: string
-    role?: string
+    firstName: string
+    lastName: string
+    roles: number[]
   }
 }
 
 export interface RegisterPayload {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   password: string
 }

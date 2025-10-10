@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { loginSchema, type LoginForm } from '@/lib/validations/auth'
 import { useAuth } from '@/hooks/useAuth'
 
-export default function LoginPage() {
+export default function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
 
@@ -24,7 +24,6 @@ export default function LoginPage() {
       await login(values)
       router.push('/')
     } catch (err: unknown) {
-      // react-hook-form will show server errors via setError if needed
       console.error('Login error', err)
     }
   }
@@ -33,25 +32,27 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center">
       <Form {...form}>
         <form className="w-full max-w-md bg-white p-6 rounded shadow" onSubmit={form.handleSubmit(onSubmit)}>
-          <h2 className="text-xl font-bold mb-4">Login ONG</h2>
+          <h2 className="text-xl font-bold mb-4">Iniciar sesión</h2>
 
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input type="email" {...form.register('email')} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+          <div className="space-y-4">
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" {...form.register('email')} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
 
-          <FormItem>
-            <FormLabel>Password</FormLabel>
-            <FormControl>
-              <Input type="password" {...form.register('password')} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+            <FormItem>
+              <FormLabel>Contraseña</FormLabel>
+              <FormControl>
+                <Input type="password" {...form.register('password')} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
 
-          <Button className="w-full mt-4" type="submit">Entrar</Button>
+          <Button className="w-full mt-4" type="submit">Ingresar</Button>
         </form>
       </Form>
     </div>

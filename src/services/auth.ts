@@ -36,7 +36,7 @@ export async function registerOng(payload: RegisterPayload): Promise<AuthRespons
 }
 
 export async function loginOng(payload: LoginPayload): Promise<AuthResponse> {
-  const url = `${API_CONFIG.BASE_URL}/auth/login`
+  const url = `${API_CONFIG.BASE_URL}/auth/admin/login`
 
   const res = await fetch(url, {
     method: 'POST',
@@ -54,78 +54,30 @@ export async function loginOng(payload: LoginPayload): Promise<AuthResponse> {
 }
 
 // Local storage helpers
-const ACCESS_TOKEN_KEY = 'dssd_access_token'
-const REFRESH_TOKEN_KEY = 'dssd_refresh_token'
+const TOKEN_KEY = 'dssd_token'
 
-export function saveAccessToken(token: string) {
+export function saveToken(token: string) {
   try {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token)
+    localStorage.setItem(TOKEN_KEY, token)
   } catch {
     // ignore
   }
 }
 
-export function getAccessToken(): string | null {
+export function getToken(): string | null {
   try {
-    return localStorage.getItem(ACCESS_TOKEN_KEY)
+    return localStorage.getItem(TOKEN_KEY)
   } catch {
     return null
   }
 }
 
-export function clearAccessToken() {
+export function clearToken() {
   try {
-    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(TOKEN_KEY)
   } catch {
     // ignore
   }
-}
-
-export function saveRefreshToken(token: string) {
-  try {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token)
-  } catch {
-    // ignore
-  }
-}
-
-export function getRefreshToken(): string | null {
-  try {
-    return localStorage.getItem(REFRESH_TOKEN_KEY)
-  } catch {
-    return null
-  }
-}
-
-export function clearRefreshToken() {
-  try {
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Request a fresh access token using the stored refresh token
- */
-export async function refreshAccessToken(): Promise<AuthResponse> {
-  const refresh = getRefreshToken()
-  if (!refresh) throw new AuthApiError('No refresh token', 401)
-
-  const url = `${API_CONFIG.BASE_URL}/auth/refresh`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken: refresh }),
-  })
-
-  if (!res.ok) {
-    const message = await parseError(res)
-    throw new AuthApiError(message, res.status)
-  }
-
-  const data = await res.json()
-  return data as AuthResponse
 }
 
 export { AuthApiError }

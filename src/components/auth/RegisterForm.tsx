@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button'
 import { registerSchema, type RegisterForm } from '@/lib/validations/auth'
 import { useAuth } from '@/hooks/useAuth'
 
-export default function RegisterPage() {
+export default function RegisterForm() {
   const { register: registerUser } = useAuth()
   const router = useRouter()
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: '', email: '', password: '' }
+    defaultValues: { firstName: '', lastName: '', email: '', password: '' }
   })
 
   const onSubmit = async (values: RegisterForm) => {
@@ -37,7 +37,15 @@ export default function RegisterPage() {
           <FormItem>
             <FormLabel>Nombre</FormLabel>
             <FormControl>
-              <Input {...form.register('name')} />
+              <Input {...form.register('firstName')} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+
+          <FormItem>
+            <FormLabel>Apellido</FormLabel>
+            <FormControl>
+              <Input {...form.register('lastName')} />
             </FormControl>
             <FormMessage />
           </FormItem>

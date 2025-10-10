@@ -1,6 +1,6 @@
 import { Project, ProjectFormData } from "@/types/project"
 import { API_CONFIG, MESSAGES } from "@/lib/constants"
-import { getAccessToken } from "@/services/auth"
+import { getToken } from "@/services/auth"
 
 export interface CreateProjectResponse {
   success: boolean
@@ -57,7 +57,7 @@ export async function createProject(
       'Content-Type': 'application/json'
     }
 
-    const token = getAccessToken()
+    const token = getToken()
     if (token) headers['Authorization'] = `Bearer ${token}`
 
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROJECTS}`, {
