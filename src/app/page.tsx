@@ -2,8 +2,12 @@
 
 import { ProjectForm } from "@/components/project-form"
 import { ProjectFormData } from "@/types/project"
+import RequireAuth from "@/components/auth/RequireAuth"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function Home() {
+  const { user } = useAuth()
+  
   const handleProjectSubmit = (projectData: ProjectFormData) => {
     console.log("Proyecto recibido en la página principal:", projectData)
   }
@@ -16,11 +20,15 @@ export default function Home() {
             ProjectPlanning
           </h1>
           <p className="text-gray-600">
-          Administración de proyectos de ONGs
+            Administración de proyectos de ONGs
           </p>
         </div>
-        
-        <ProjectForm onSubmit={handleProjectSubmit} />
+
+        {user ? (
+          <RequireAuth>
+            <ProjectForm onSubmit={handleProjectSubmit} />
+          </RequireAuth>
+        ) : null}
         
       </div>
     </div>
