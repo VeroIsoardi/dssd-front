@@ -34,6 +34,63 @@ export class ProjectApiError extends Error {
 }
 
 /**
+ * Fetches all projects from the backend
+ * @returns Promise with array of projects
+ */
+export async function getProjects(): Promise<Project[]> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+
+    const token = getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROJECTS}`, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!response.ok) {
+      let errorMessage: string = 'Failed to fetch projects'
+      let errorDetails: ApiError | undefined
+
+      try {
+        errorDetails = await response.json()
+        errorMessage = errorDetails?.message || 'Failed to fetch projects'
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
+
+      throw new ProjectApiError(
+        errorMessage,
+        response.status,
+        errorDetails?.error
+      )
+    }
+
+    const result: GetProjectsResponse = await response.json()
+    return result.data
+  } catch (error) {
+    if (error instanceof ProjectApiError) {
+      throw error
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ProjectApiError(
+        MESSAGES.ERROR.NETWORK_ERROR,
+        0
+      )
+    }
+
+    throw new ProjectApiError(
+      'Failed to fetch projects',
+      500
+    )
+  }
+}
+
+/**
  * Creates a new project by sending data to the backend
  * @param data - Project form data to be sent
  * @returns Promise with the created project

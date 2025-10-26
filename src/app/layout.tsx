@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+"use client"
+
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from '@/context/AuthProvider'
 import Link from 'next/link'
 import { AuthHeader } from '@/components/auth/AuthHeader'
+import { Navbar } from '@/components/navbar'
+import { useAuth } from "@/hooks/useAuth"
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,10 +19,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "DSSD Grupo 6",
-  description: "Front DSSD Grupo 6",
-};
+function Header() {
+  const { user } = useAuth();
+
+  return (
+    <header className="bg-white border-b">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <Link href="/" className="font-bold">ProjectPlanning</Link>
+        <AuthHeader />
+      </div>
+      {user && <Navbar />}
+    </header>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -32,13 +44,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <header className="bg-white border-b">
-            <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-              <Link href="/" className="font-bold">ProjectPlanning</Link>
-              <AuthHeader />
-            </div>
-          </header>
-          {children}
+          <Header />
+          <main className="min-h-screen bg-gray-50">
+            {children}
+          </main>
         </AuthProvider>
         <Toaster position="top-right" richColors />
       </body>
