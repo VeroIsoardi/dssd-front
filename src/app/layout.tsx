@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { AuthHeader } from '@/components/auth/AuthHeader'
 import { Navbar } from '@/components/navbar'
 import { useAuth } from "@/hooks/useAuth"
+import { usePathname } from 'next/navigation'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,6 +22,12 @@ const geistMono = Geist_Mono({
 
 function Header() {
   const { user } = useAuth();
+  const pathname = usePathname();
+  
+  // Hide header on root page when not logged in
+  if (pathname === '/' && !user) {
+    return null;
+  }
 
   return (
     <header className="bg-white border-b">
