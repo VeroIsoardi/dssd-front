@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { DatePicker } from "@/components/ui/date-picker"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { FormField } from "@/components/ui/form-field"
+import { Switch } from "@/components/ui/switch"
 import { ChevronLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { MESSAGES } from "@/lib/constants"
@@ -62,59 +63,81 @@ export function TasksStep({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField 
-                  label="Nombre de la tarea" 
-                  htmlFor={`tasks.${index}.name`} 
-                  required 
-                  error={errors.tasks?.[index]?.name?.message}
-                >
-                  <Input
-                    {...register(`tasks.${index}.name`)}
-                    placeholder={MESSAGES.PLACEHOLDERS.TASK_NAME}
-                    className={errors.tasks?.[index]?.name ? "border-destructive" : ""}
-                  />
-                </FormField>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField 
+                    label="Nombre de la tarea" 
+                    htmlFor={`tasks.${index}.name`} 
+                    required 
+                    error={errors.tasks?.[index]?.name?.message}
+                  >
+                    <Input
+                      {...register(`tasks.${index}.name`)}
+                      placeholder={MESSAGES.PLACEHOLDERS.TASK_NAME}
+                      className={errors.tasks?.[index]?.name ? "border-destructive" : ""}
+                    />
+                  </FormField>
 
-                <FormField 
-                  label="Descripción" 
-                  htmlFor={`tasks.${index}.description`} 
-                  required 
-                  error={errors.tasks?.[index]?.description?.message}
-                  className="md:col-span-1"
-                >
-                  <Textarea
-                    {...register(`tasks.${index}.description`)}
-                    placeholder={MESSAGES.PLACEHOLDERS.TASK_DESCRIPTION}
-                    rows={2}
-                    className={errors.tasks?.[index]?.description ? "border-destructive" : ""}
-                  />
-                </FormField>
+                  <FormField 
+                    label="Descripción" 
+                    htmlFor={`tasks.${index}.description`} 
+                    required 
+                    error={errors.tasks?.[index]?.description?.message}
+                    className="md:col-span-1"
+                  >
+                    <Textarea
+                      {...register(`tasks.${index}.description`)}
+                      placeholder={MESSAGES.PLACEHOLDERS.TASK_DESCRIPTION}
+                      rows={2}
+                      className={errors.tasks?.[index]?.description ? "border-destructive" : ""}
+                    />
+                  </FormField>
+                </div>
 
-                <FormField 
-                  label="Fecha de inicio" 
-                  required 
-                  error={errors.tasks?.[index]?.startDate?.message}
-                >
-                  <DatePicker
-                    value={watch(`tasks.${index}.startDate`) ? parseDateFromInput(watch(`tasks.${index}.startDate`)) : undefined}
-                    onChange={(date) => setValue(`tasks.${index}.startDate`, date ? formatDateForInput(date) : "")}
-                    placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
-                    className={errors.tasks?.[index]?.startDate ? "border-destructive" : ""}
-                  />
-                </FormField>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField 
+                    label="Fecha de inicio" 
+                    required 
+                    error={errors.tasks?.[index]?.startDate?.message}
+                  >
+                    <DatePicker
+                      value={watch(`tasks.${index}.startDate`) ? parseDateFromInput(watch(`tasks.${index}.startDate`)) : undefined}
+                      onChange={(date) => setValue(`tasks.${index}.startDate`, date ? formatDateForInput(date) : "")}
+                      placeholder={MESSAGES.PLACEHOLDERS.SELECT_START_DATE}
+                      className={errors.tasks?.[index]?.startDate ? "border-destructive" : ""}
+                    />
+                  </FormField>
 
-                <FormField 
-                  label="Fecha de fin" 
-                  required 
-                  error={errors.tasks?.[index]?.endDate?.message}
-                >
-                  <DatePicker
-                    value={watch(`tasks.${index}.endDate`) ? parseDateFromInput(watch(`tasks.${index}.endDate`)) : undefined}
-                    onChange={(date) => setValue(`tasks.${index}.endDate`, date ? formatDateForInput(date) : "")}
-                    placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
-                    className={errors.tasks?.[index]?.endDate ? "border-destructive" : ""}
-                  />
+                  <FormField 
+                    label="Fecha de fin" 
+                    required 
+                    error={errors.tasks?.[index]?.endDate?.message}
+                  >
+                    <DatePicker
+                      value={watch(`tasks.${index}.endDate`) ? parseDateFromInput(watch(`tasks.${index}.endDate`)) : undefined}
+                      onChange={(date) => setValue(`tasks.${index}.endDate`, date ? formatDateForInput(date) : "")}
+                      placeholder={MESSAGES.PLACEHOLDERS.SELECT_END_DATE}
+                      className={errors.tasks?.[index]?.endDate ? "border-destructive" : ""}
+                    />
+                  </FormField>
+                </div>
+
+                <FormField label="Visibilidad">
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      checked={watch(`tasks.${index}.isPrivate`) || false}
+                      onCheckedChange={(checked) => setValue(`tasks.${index}.isPrivate`, checked)}
+                    />
+                    <span className="text-sm">
+                      {watch(`tasks.${index}.isPrivate`) ? 'Tarea privada' : 'Tarea pública'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {watch(`tasks.${index}.isPrivate`) 
+                      ? 'Solo tú podrás ver y resolver esta tarea' 
+                      : 'Cualquier miembro del proyecto puede ver y resolver esta tarea'
+                    }
+                  </p>
                 </FormField>
               </div>
             </Card>

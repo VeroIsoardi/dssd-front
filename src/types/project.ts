@@ -1,8 +1,14 @@
 export interface Task {
+  id: string
   name: string
   description: string
   startDate: string
   endDate: string
+  status: 'pending' | 'in_progress' | 'completed'
+  completedAt?: string
+  projectId: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Country {
@@ -25,6 +31,8 @@ export interface ProjectFormProps {
 
 export interface Project {
   id: string
+  ongName: string
+  ongMail: string
   name: string
   description: string
   country: string

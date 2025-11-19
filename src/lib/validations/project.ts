@@ -5,6 +5,7 @@ export const taskSchema = z.object({
   description: z.string().min(1, "La descripción de la tarea es obligatoria"),
   startDate: z.string().min(1, "La fecha de inicio es obligatoria"),
   endDate: z.string().min(1, "La fecha de fin es obligatoria"),
+  isPrivate: z.boolean().default(false),
 }).refine((data) => {
   const startDate = new Date(data.startDate)
   const endDate = new Date(data.endDate)

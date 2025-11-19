@@ -3,7 +3,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from '@/context/AuthProvider'
-import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { useAuth } from "@/hooks/useAuth"
 import { usePathname } from 'next/navigation'

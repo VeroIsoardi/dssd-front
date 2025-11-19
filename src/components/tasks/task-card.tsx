@@ -22,8 +22,16 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   return (
     <Card className="p-4 shadow-sm">
       <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold text-lg mb-2">{task.name}</h3>
+        <div className="flex-1">
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="font-semibold text-lg">{task.name}</h3>
+            <Badge
+              variant={task.isPrivate ? "secondary" : "outline"}
+              className="ml-2"
+            >
+              {task.isPrivate ? 'Privada' : 'Pública'}
+            </Badge>
+          </div>
           <p className="text-gray-600 mb-4">{task.description}</p>
           <div className="space-y-2">
             <Badge className={getStatusColor(task.status)}>
@@ -32,7 +40,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           </div>
         </div>
         {(onEdit || onDelete) && (
-          <div className="space-x-2">
+          <div className="space-x-2 ml-4">
             {onEdit && (
               <button
                 onClick={onEdit}
@@ -54,12 +62,12 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
       </div>
       <div className="mt-4 text-sm text-gray-600">
         <p>
-          Period: {format(new Date(task.startDate), 'MMM d, yyyy')} -{' '}
+          Período: {format(new Date(task.startDate), 'MMM d, yyyy')} -{' '}
           {format(new Date(task.endDate), 'MMM d, yyyy')}
         </p>
         {task.completedAt && (
           <p>
-            Completed: {format(new Date(task.completedAt), 'MMM d, yyyy')}
+            Completado: {format(new Date(task.completedAt), 'MMM d, yyyy')}
           </p>
         )}
       </div>

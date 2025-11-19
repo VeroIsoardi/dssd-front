@@ -2,11 +2,12 @@ export interface Task {
   id: string
   name: string
   description: string
-  startDate: string           // Format: YYYY-MM-DD
-  endDate: string            // Format: YYYY-MM-DD
+  startDate: string
+  endDate: string
   status: TaskStatus
-  completedAt?: string       // When the task was marked as completed
-  projectId: string         // The project this task belongs to
+  isPrivate: boolean
+  completedAt?: string
+  projectId: string
   createdAt: string
   updatedAt: string
 }
