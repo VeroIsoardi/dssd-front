@@ -4,6 +4,7 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 import { Form, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -29,9 +30,9 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <Form {...form}>
-        <form className="w-full max-w-md bg-white p-6 rounded shadow" onSubmit={form.handleSubmit(onSubmit)}>
+        <form className="w-full max-w-md p-6" onSubmit={form.handleSubmit(onSubmit)}>
           <h2 className="text-xl font-bold mb-4">Iniciar sesión</h2>
 
           <div className="space-y-4">
@@ -53,6 +54,13 @@ export default function LoginForm() {
           </div>
 
           <Button className="w-full mt-4" type="submit">Ingresar</Button>
+
+          <p className="text-center text-sm text-gray-600 mt-4">
+            ¿No tienes cuenta?{' '}
+            <Link href="/register" className="text-blue-600 hover:underline">
+              Regístrate aquí
+            </Link>
+          </p>
         </form>
       </Form>
     </div>

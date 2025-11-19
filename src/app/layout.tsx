@@ -24,8 +24,7 @@ function Header() {
   const { user } = useAuth();
   const pathname = usePathname();
   
-  // Hide header on root page when not logged in
-  if (pathname === '/' && !user) {
+  if (!user && (pathname === '/' || pathname === '/register')) {
     return null;
   }
 

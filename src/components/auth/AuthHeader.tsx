@@ -23,7 +23,7 @@ export function AuthHeader() {
 
   return (
     <div className="flex items-center gap-4">
-      <Link href="/login">Iniciar sesión</Link>
+      <Link href="/">Iniciar sesión</Link>
       {/* <Link href="/register">Register</Link> */}
     </div>
   )
