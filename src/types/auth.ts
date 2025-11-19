@@ -1,3 +1,5 @@
+import type { UserRole } from '@/lib/constants/roles'
+
 export interface AuthResponse {
   token: string
   user: {
@@ -5,7 +7,7 @@ export interface AuthResponse {
     email: string
     firstName: string
     lastName: string
-    roles: number[]
+    roles: UserRole[]
   }
 }
 

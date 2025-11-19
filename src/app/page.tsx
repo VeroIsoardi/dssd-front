@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Form, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -11,20 +13,33 @@ import { loginSchema, type LoginForm as LoginFormType } from '@/lib/validations/
 import { useAuth } from "@/hooks/useAuth"
 
 export default function Home() {
-  const { user, loading, login } = useAuth()
+  const { user, loading, login, getDefaultRoute } = useAuth()
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<LoginFormType>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' }
   })
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.push(getDefaultRoute())
+    }
+  }, [loading, user, router, getDefaultRoute])
+
   const onSubmit = async (values: LoginFormType) => {
+    setIsSubmitting(true)
     try {
       await login(values)
-      router.push('/')
     } catch (err: unknown) {
       console.error('Login error', err)
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión'
+      toast.error('Error al iniciar sesión', {
+        description: errorMessage
+      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -71,7 +86,9 @@ export default function Home() {
                 </FormItem>
               </div>
 
-              <Button className="w-full mt-4" type="submit">Ingresar</Button>
+              <Button className="w-full mt-4" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Ingresando...' : 'Ingresar'}
+              </Button>
             </form>
           </Form>
         </div>
@@ -80,26 +97,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ProjectPlanning
-          </h1>
-          <p className="text-gray-600">
-            Administración de proyectos de ONGs
-          </p>
-        </div>
-
-        <div className="text-center">
-          <Link 
-            href="/project-form" 
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Crear nuevo proyecto
-          </Link>
-        </div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
     </div>
   )
 }

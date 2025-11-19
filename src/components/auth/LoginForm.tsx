@@ -11,7 +11,7 @@ import { loginSchema, type LoginForm } from '@/lib/validations/auth'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
-  const { login } = useAuth()
+  const { login, getDefaultRoute } = useAuth()
   const router = useRouter()
 
   const form = useForm<LoginForm>({
@@ -22,7 +22,7 @@ export default function LoginForm() {
   const onSubmit = async (values: LoginForm) => {
     try {
       await login(values)
-      router.push('/')
+      router.push(getDefaultRoute())
     } catch (err: unknown) {
       console.error('Login error', err)
     }

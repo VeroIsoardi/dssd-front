@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth'
-import { loginOng, registerOng, saveToken, getToken, clearToken, saveUserData, getUserData, clearUserData } from '@/services/auth'
+import { login as authLogin, register as authRegister, saveToken, getToken, clearToken, saveUserData, getUserData, clearUserData } from '@/services/auth'
+import { USER_ROLES, hasRole } from '@/lib/constants/roles'
 
 type AuthContextValue = {
   user: AuthResponse['user'] | null
@@ -12,6 +13,14 @@ type AuthContextValue = {
   login: (payload: LoginPayload) => Promise<void>
   register: (payload: RegisterPayload) => Promise<void>
   logout: () => void
+  getDefaultRoute: () => string
+}
+
+function getDefaultRouteForRole(userRoles: number[]): string {
+  if (hasRole(userRoles, USER_ROLES.ONG)) return '/projects'
+  if (hasRole(userRoles, USER_ROLES.ORGANIZATION)) return '/compromises'
+  if (hasRole(userRoles, USER_ROLES.DIRECTOR)) return '/dashboard'
+  return '/'
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -32,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (payload: LoginPayload) => {
-    const res = await loginOng(payload)
+    const res = await authLogin(payload)
     saveToken(res.token)
     saveUserData(res.user)
     setToken(res.token)
@@ -40,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (payload: RegisterPayload) => {
-    const res = await registerOng(payload)
+    const res = await authRegister(payload)
     saveToken(res.token)
     saveUserData(res.user)
     setToken(res.token)
@@ -54,10 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
-  // No refresh interval needed - using a single JWT token
+  const getDefaultRoute = (): string => {
+    if (!user) return '/'
+    return getDefaultRouteForRole(user.roles)
+  }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, getDefaultRoute }}>
       {children}
     </AuthContext.Provider>
   )

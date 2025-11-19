@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LoadingState } from '@/components/ui/loading-state'
 import RequireAuth from '@/components/auth/RequireAuth'
 import { formatDate, getProjectStatus } from '@/lib/utils/format'
+import { USER_ROLES } from '@/lib/constants/roles'
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -52,7 +53,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={[USER_ROLES.ONG]}>
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-8">
           <div>
