@@ -1,6 +1,7 @@
 export const USER_ROLES = {
-  ONG: 1,           // ONGs - can create projects
-  ORGANIZATION: 2,  // Organizations - can create compromises for project tasks
+  ADMIN: 0,        // Admins - CRUD only of users.
+  ONG: 1,          // ONGs - can create projects
+  ORGANIZATION: 2, // Organizations - can create compromises for project tasks
   DIRECTOR: 3,     // Directors - can view dashboard with project info
 } as const
 
@@ -8,6 +9,7 @@ export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES]
 
 
 export const ROLE_NAMES: Record<UserRole, string> = {
+  [USER_ROLES.ADMIN]: 'Administrador',
   [USER_ROLES.ONG]: 'ONG',
   [USER_ROLES.ORGANIZATION]: 'Organización',
   [USER_ROLES.DIRECTOR]: 'Director',
@@ -31,7 +33,7 @@ export function hasAnyRole(userRoles: number[], roles: UserRole[]): boolean {
 export function getRoleName(userRoles: number[]): string {
   if (!Array.isArray(userRoles) || userRoles.length === 0) return 'Usuario'
   const names = userRoles
-    .filter((r): r is UserRole => r === USER_ROLES.ONG || r === USER_ROLES.ORGANIZATION || r === USER_ROLES.DIRECTOR)
+    .filter((r): r is UserRole => r === USER_ROLES.ADMIN || r === USER_ROLES.ONG || r === USER_ROLES.ORGANIZATION || r === USER_ROLES.DIRECTOR)
     .map(r => ROLE_NAMES[r])
   return names.length ? names.join(', ') : 'Usuario'
 }

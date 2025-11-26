@@ -25,6 +25,10 @@ export function Navbar() {
 
     const items: NavItem[] = []
 
+    if (hasRole(user.roles, USER_ROLES.ADMIN)) {
+      items.push({ label: 'Usuarios', path: '/users' })
+    }
+
     if (hasRole(user.roles, USER_ROLES.ONG)) {
       items.push({ label: 'Proyectos', path: '/projects' })
     }
