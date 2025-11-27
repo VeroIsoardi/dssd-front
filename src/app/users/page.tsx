@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+// removed useRouter; opening edit/create in a new tab instead
 import { toast } from 'sonner'
 import RequireAuth from '@/components/auth/RequireAuth'
 import { USER_ROLES } from '@/lib/constants/roles'
 import { LoadingState } from '@/components/ui/loading-state'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getUsers, changeUserPassword, UsersApiError } from '@/services/users'
+import { getUsers, changeUserPassword, deleteUser, UsersApiError } from '@/services/users'
 import type { User } from '@/types/user'
 import { Input } from '@/components/ui/input'
 import { formatDate } from '@/lib/utils/format'
@@ -20,7 +20,7 @@ export default function UsersPage() {
   const [passwordValue, setPasswordValue] = useState('')
   const [repeatPasswordValue, setRepeatPasswordValue] = useState('')
 
-  const router = useRouter()
+  
 
   useEffect(() => {
     const load = async () => {
@@ -48,6 +48,24 @@ export default function UsersPage() {
     setRepeatPasswordValue('')
   }
 
+  
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('¿Seguro que desea eliminar este usuario?')) return
+    try {
+      await deleteUser(userId)
+      setUsers(prev => prev.filter(u => u.id !== userId))
+      toast.success('Usuario eliminado')
+    } catch (err) {
+      console.error('Delete user', err)
+      if (err instanceof UsersApiError) {
+        toast.error('Error al eliminar usuario', { description: err.message })
+      } else {
+        toast.error('Error inesperado al eliminar usuario')
+      }
+    }
+  }
+
   const handleChangePassword = async (userId: string) => {
     if (passwordValue !== repeatPasswordValue) {
       toast.error('Las contraseñas no coinciden')
@@ -73,7 +91,7 @@ export default function UsersPage() {
             <p className="text-gray-600 mt-2">Lista de usuarios registrados</p>
           </div>
           <div className="flex items-center space-x-2">
-            <Button onClick={() => router.push('/user-form')}>Crear Usuario</Button>
+            <Button onClick={() => window.open('/user-form', '_blank')}>Crear Usuario</Button>
           </div>
         </div>
 
@@ -106,7 +124,9 @@ export default function UsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.createdAt ? formatDate(u.createdAt) : '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end items-center space-x-2">
-                        <Button variant="ghost" onClick={() => handleOpenPassword(u.id)}>Cambiar contraseña</Button>
+                        <Button variant="ghost" onClick={() => window.open(`/user-form/${u.id}`, '_blank')}>Actualizar campos</Button>
+                        {/* <Button variant="ghost" onClick={() => handleOpenPassword(u.id)}>Cambiar contraseña</Button> */}
+                        <Button variant="ghost" onClick={() => handleDeleteUser(u.id)}>Borrar usuario</Button>
                       </div>
 
                       {passwordEditingUser === u.id && (
