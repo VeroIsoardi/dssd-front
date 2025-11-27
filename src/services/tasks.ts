@@ -1,4 +1,4 @@
-import { Task } from '@/types/task'
+import { Task, AssignedTask, AssignedTasksResponse } from '@/types/task'
 import { API_CONFIG } from '@/lib/constants'
 import { getToken } from '@/services/auth'
 import { handleApiError } from '@/lib/api-client'
@@ -40,10 +40,11 @@ const getAuthHeaders = (): Record<string, string> => {
 
 export const taskService = {
   // Get tasks for a project
-  getAll: async (projectId: string): Promise<Task[]> => {
+  getAll: async (projectId: string, privateTasks: boolean = false): Promise<Task[]> => {
     try {
+      const url = `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks?privateTask=${privateTasks}`
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks`,
+        url,
         { headers: getAuthHeaders() }
       )
       
@@ -69,8 +70,21 @@ export const taskService = {
       
       const result = await response.json()
       console.log('Tasks API response:', result)
-      // Handle different response formats: { data: Task[] } or Task[]
-      const tasks = Array.isArray(result) ? result : (result.data || [])
+      // Handle different response formats: 
+      // [[Task[]], count] or { data: Task[] } or Task[]
+      let tasks: Task[] = []
+      if (Array.isArray(result)) {
+        if (result.length === 2 && Array.isArray(result[0])) {
+          // Format: [[Task[]], count]
+          tasks = result[0]
+        } else {
+          // Format: Task[]
+          tasks = result
+        }
+      } else {
+        // Format: { data: Task[] }
+        tasks = result.data || []
+      }
       console.log('Parsed tasks:', tasks)
       return tasks
     } catch (error) {
@@ -114,5 +128,76 @@ export const taskService = {
     }
   },
 
+  // Get assigned tasks for the logged organization
+  getAssignedTasks: async (): Promise<AssignedTasksResponse> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/tasks/assigned`,
+        { headers: getAuthHeaders() }
+      )
+      
+      if (!response.ok) {
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          handleApiError(response)
+          throw new TaskApiError('No autorizado - redirigiendo al login', 401)
+        }
+
+        let errorMessage = 'Error al obtener las tareas asignadas'
+        let errorDetails: ApiError | undefined
+        
+        try {
+          errorDetails = await response.json()
+          errorMessage = errorDetails?.message || errorMessage
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`
+        }
+        
+        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
+      }
+      
+      const result = await response.json()
+      return result
+    } catch (error) {
+      if (error instanceof TaskApiError) throw error
+      throw new TaskApiError('Error al obtener las tareas asignadas', 500)
+    }
+  },
+
+  // Mark a task as finished
+  finishTask: async (taskId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/tasks/${taskId}/finish`,
+        {
+          method: 'POST',
+          headers: getAuthHeaders()
+        }
+      )
+      
+      if (!response.ok) {
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          handleApiError(response)
+          throw new TaskApiError('No autorizado - redirigiendo al login', 401)
+        }
+
+        let errorMessage = 'Error al completar la tarea'
+        let errorDetails: ApiError | undefined
+        
+        try {
+          errorDetails = await response.json()
+          errorMessage = errorDetails?.message || errorMessage
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`
+        }
+        
+        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
+      }
+    } catch (error) {
+      if (error instanceof TaskApiError) throw error
+      throw new TaskApiError('Error al completar la tarea', 500)
+    }
+  },
 
 }

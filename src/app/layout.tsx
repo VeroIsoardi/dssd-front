@@ -1,11 +1,5 @@
-"use client"
-
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { AuthProvider } from '@/context/AuthProvider'
-import { Navbar } from '@/components/navbar'
-import { useAuth } from "@/hooks/useAuth"
-import { usePathname } from 'next/navigation'
+import { ClientLayout } from '@/components/ClientLayout'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,21 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-function Header() {
-  const { user } = useAuth();
-  const pathname = usePathname();
-  
-  if (!user && (pathname === '/' || pathname === '/register')) {
-    return null;
-  }
-
-  return (
-    <header className="bg-white border-b">
-      {user && <Navbar />}
-    </header>
-  );
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,13 +22,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <Header />
-          <main className="min-h-screen bg-gray-50">
-            {children}
-          </main>
-        </AuthProvider>
-        <Toaster position="top-right" richColors />
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

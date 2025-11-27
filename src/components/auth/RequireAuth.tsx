@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { hasAnyRole, type UserRole } from '@/lib/constants/roles'
@@ -18,6 +18,7 @@ export default function RequireAuth({
 }: RequireAuthProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
     if (!loading) {
@@ -30,13 +31,16 @@ export default function RequireAuth({
         const hasPermission = hasAnyRole(user.roles, allowedRoles)
         if (!hasPermission) {
           router.push(fallbackPath)
+          return
         }
       }
+      
+      setIsChecking(false)
     }
   }, [loading, user, allowedRoles, fallbackPath, router])
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>
+  if (loading || isChecking) {
+    return null
   }
 
   if (!user) {

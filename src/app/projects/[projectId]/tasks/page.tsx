@@ -14,33 +14,55 @@ export default function TasksPage({
   params: Promise<{ projectId: string }>
 }) {
   const { projectId } = use(params)
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [publicTasks, setPublicTasks] = useState<Task[]>([])
+  const [privateTasks, setPrivateTasks] = useState<Task[]>([])
+  const [isLoadingPublic, setIsLoadingPublic] = useState(true)
+  const [isLoadingPrivate, setIsLoadingPrivate] = useState(true)
+  const [activeTab, setActiveTab] = useState('public')
 
   useEffect(() => {
-    const loadTasks = async () => {
+    const loadPublicTasks = async () => {
       try {
-        const data = await taskService.getAll(projectId)
-        setTasks(data)
+        const data = await taskService.getAll(projectId, false)
+        setPublicTasks(data)
       } catch (error) {
-        console.error('Error loading tasks:', error)
+        console.error('Error loading public tasks:', error)
         if (error instanceof TaskApiError) {
-          toast.error('Error al cargar tareas', {
+          toast.error('Error al cargar compromisos', {
             description: error.message
           })
         } else {
-          toast.error('Error inesperado al cargar tareas')
+          toast.error('Error inesperado al cargar compromisos')
         }
       } finally {
-        setIsLoading(false)
+        setIsLoadingPublic(false)
       }
     }
 
-    loadTasks()
+    loadPublicTasks()
   }, [projectId])
 
-  const publicTasks = tasks.filter(task => !task.isPrivate)
-  const privateTasks = tasks.filter(task => task.isPrivate)
+  useEffect(() => {
+    const loadPrivateTasks = async () => {
+      try {
+        const data = await taskService.getAll(projectId, true)
+        setPrivateTasks(data)
+      } catch (error) {
+        console.error('Error loading private tasks:', error)
+        if (error instanceof TaskApiError) {
+          toast.error('Error al cargar tareas privadas', {
+            description: error.message
+          })
+        } else {
+          toast.error('Error inesperado al cargar tareas privadas')
+        }
+      } finally {
+        setIsLoadingPrivate(false)
+      }
+    }
+
+    loadPrivateTasks()
+  }, [projectId])
 
   return (
     <div className="container mx-auto py-8">
@@ -48,32 +70,36 @@ export default function TasksPage({
         <h1 className="text-2xl font-bold">Tareas</h1>
       </div>
 
-      {isLoading ? (
-        <LoadingState message="Cargando tareas..." />
-      ) : (
-        <Tabs defaultValue="public" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="public">
-              Tareas públicas
-            </TabsTrigger>
-            <TabsTrigger value="private">
-              Tareas privadas
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="public">
+      <Tabs defaultValue="public" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="public">
+            Compromisos ({publicTasks.length})
+          </TabsTrigger>
+          <TabsTrigger value="private">
+            Mis Tareas ({privateTasks.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="public">
+          {isLoadingPublic ? (
+            <LoadingState message="Cargando compromisos..." />
+          ) : (
             <TaskList 
               tasks={publicTasks}
             />
-          </TabsContent>
-          
-          <TabsContent value="private">
+          )}
+        </TabsContent>
+        
+        <TabsContent value="private">
+          {isLoadingPrivate ? (
+            <LoadingState message="Cargando tareas privadas..." />
+          ) : (
             <TaskList 
               tasks={privateTasks}
             />
-          </TabsContent>
-        </Tabs>
-      )}
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

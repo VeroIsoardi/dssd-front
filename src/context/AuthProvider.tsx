@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(t)
       setUser(u)
     }
+    // Set loading to false synchronously to avoid render delays
     setLoading(false)
   }, [])
 

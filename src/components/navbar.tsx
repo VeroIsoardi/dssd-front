@@ -34,6 +34,7 @@ export function Navbar() {
     }
 
     if (hasRole(user.roles, USER_ROLES.ORGANIZATION)) {
+      items.push({ label: 'Proyectos', path: '/organization-projects' })
       items.push({ label: 'Compromisos', path: '/compromises' })
     }
 
