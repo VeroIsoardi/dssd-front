@@ -201,13 +201,16 @@ export const taskService = {
   },
 
   // Grab/assign a task to the current user
-  grabTask: async (taskId: string): Promise<void> => {
+  grabTask: async (taskId: string, projectId?: string): Promise<void> => {
     try {
+      const body = projectId ? JSON.stringify({ projectId }) : undefined
+      
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/tasks/${taskId}/take`,
         {
           method: 'POST',
-          headers: getAuthHeaders()
+          headers: getAuthHeaders(),
+          body
         }
       )
       

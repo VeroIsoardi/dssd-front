@@ -89,7 +89,7 @@ export default function TasksPage({
 
   const handleGrabTask = async (task: Task) => {
     try {
-      await taskService.grabTask(task.id)
+      await taskService.grabTask(task.id, projectId)
       toast.success('Tarea tomada exitosamente')
       
       // Remove from public tasks and reload private tasks

@@ -74,7 +74,7 @@ export default function OrganizationProjectDetailPage({
 
   const handleTakeTask = async (taskId: string) => {
     try {
-      await taskService.grabTask(taskId)
+      await taskService.grabTask(taskId, projectId)
       toast.success('Tarea tomada exitosamente')
       
       // Reload tasks to update the list

@@ -32,7 +32,6 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab }: TaskCar
             {onGrab && !task.collaboratorId && !task.isFinished && (
               <Button 
                 variant="default"
-                className="bg-blue-600 hover:bg-blue-700"
                 onClick={onGrab}
               >
                 Tomar Tarea
