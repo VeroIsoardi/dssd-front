@@ -38,7 +38,7 @@ export function Navbar() {
     }
 
     if (hasRole(user.roles, USER_ROLES.DIRECTOR)) {
-      items.push({ label: 'Panel', path: '/dashboard' })
+      items.push({ label: 'Dashboard', path: '/dashboard' })
     }
 
     return items

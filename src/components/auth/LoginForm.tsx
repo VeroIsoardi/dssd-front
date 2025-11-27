@@ -54,13 +54,6 @@ export default function LoginForm() {
           </div>
 
           <Button className="w-full mt-4" type="submit">Ingresar</Button>
-
-          <p className="text-center text-sm text-gray-600 mt-4">
-            ¿No tienes cuenta?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline">
-              Regístrate aquí
-            </Link>
-          </p>
         </form>
       </Form>
     </div>

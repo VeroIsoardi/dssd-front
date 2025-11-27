@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 // removed useRouter; opening edit/create in a new tab instead
 import { toast } from 'sonner'
 import RequireAuth from '@/components/auth/RequireAuth'
-import { USER_ROLES } from '@/lib/constants/roles'
+import { getRoleName, USER_ROLES } from '@/lib/constants/roles'
 import { LoadingState } from '@/components/ui/loading-state'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -47,8 +47,6 @@ export default function UsersPage() {
     setPasswordValue('')
     setRepeatPasswordValue('')
   }
-
-  
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('¿Seguro que desea eliminar este usuario?')) return
@@ -120,13 +118,12 @@ export default function UsersPage() {
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{u.firstName} {u.lastName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.roles.join(', ')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getRoleName(u.roles)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.createdAt ? formatDate(u.createdAt) : '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end items-center space-x-2">
-                        <Button variant="ghost" onClick={() => window.open(`/user-form/${u.id}`, '_blank')}>Actualizar campos</Button>
-                        {/* <Button variant="ghost" onClick={() => handleOpenPassword(u.id)}>Cambiar contraseña</Button> */}
-                        <Button variant="ghost" onClick={() => handleDeleteUser(u.id)}>Borrar usuario</Button>
+                        <Button variant="outline" onClick={() => window.open(`/user-form/${u.id}`, '_blank')}>Editar</Button>
+                        <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteUser(u.id)}>Eliminar</Button>
                       </div>
 
                       {passwordEditingUser === u.id && (
