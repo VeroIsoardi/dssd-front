@@ -1,6 +1,7 @@
 import { Project, ProjectFormData } from "@/types/project"
 import { API_CONFIG, MESSAGES } from "@/lib/constants"
 import { getToken } from "@/services/auth"
+import { handleApiError } from "@/lib/api-client"
 
 export interface CreateProjectResponse {
   success: boolean
@@ -52,6 +53,12 @@ export async function getProjects(): Promise<Project[]> {
     })
 
     if (!response.ok) {
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        handleApiError(response)
+        throw new ProjectApiError('No autorizado - redirigiendo al login', 401)
+      }
+
       let errorMessage: string = 'Failed to fetch projects'
       let errorDetails: ApiError | undefined
 
@@ -124,6 +131,12 @@ export async function createProject(
     })
 
     if (!response.ok) {
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        handleApiError(response)
+        throw new ProjectApiError('No autorizado - redirigiendo al login', 401)
+      }
+
       let errorMessage: string = MESSAGES.ERROR.PROJECT_CREATE_FAILED
       let errorDetails: ApiError | undefined
 

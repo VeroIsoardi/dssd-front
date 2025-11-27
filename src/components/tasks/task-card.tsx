@@ -1,7 +1,8 @@
 import { Task, statusLabels } from '@/types/task'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { format } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { formatDate } from '@/lib/utils/format'
 
 interface TaskCardProps {
   task: Task
@@ -40,34 +41,31 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           </div>
         </div>
         {(onEdit || onDelete) && (
-          <div className="space-x-2 ml-4">
+          <div className="flex space-x-2 ml-4">
             {onEdit && (
-              <button
-                onClick={onEdit}
-                className="text-blue-600 hover:text-blue-800"
-              >
+              <Button variant="outline" onClick={onEdit}>
                 Editar
-              </button>
+              </Button>
             )}
             {onDelete && (
-              <button
+              <Button 
+                variant="ghost" 
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={onDelete}
-                className="text-red-600 hover:text-red-800"
               >
                 Eliminar
-              </button>
+              </Button>
             )}
           </div>
         )}
       </div>
       <div className="mt-4 text-sm text-gray-600">
         <p>
-          Período: {format(new Date(task.startDate), 'MMM d, yyyy')} -{' '}
-          {format(new Date(task.endDate), 'MMM d, yyyy')}
+          Período: {formatDate(task.startDate)} - {formatDate(task.endDate)}
         </p>
         {task.completedAt && (
           <p>
-            Completado: {format(new Date(task.completedAt), 'MMM d, yyyy')}
+            Completado: {formatDate(task.completedAt)}
           </p>
         )}
       </div>

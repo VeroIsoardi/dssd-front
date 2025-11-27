@@ -75,7 +75,7 @@ export default function ProjectsPage() {
             <CardContent className="py-12 text-center">
               <p className="text-gray-500 mb-4">No hay proyectos creados aún</p>
               <Button onClick={() => router.push('/project-form')}>
-                Crear tu primer proyecto
+                Creá tu primer proyecto
               </Button>
             </CardContent>
           </Card>
@@ -109,18 +109,20 @@ export default function ProjectsPage() {
                       <span className="ml-2">{formatDate(project.endDate)}</span>
                     </div>
 
-                    <div className="text-sm">
-                      <span className="text-gray-500">Tareas:</span>
-                      <span className="ml-2 font-medium">{project.tasks?.length || 0}</span>
-                    </div>
-
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t space-y-2">
                       <Button 
                         onClick={() => handleViewTasks(project.id)}
                         className="w-full"
                         variant="outline"
                       >
-                        Ver Tareas
+                        Ver tareas
+                      </Button>
+                      <Button 
+                        className="w-full"
+                        variant="secondary"
+                        disabled
+                      >
+                        Marcar como finalizado
                       </Button>
                     </div>
                   </div>

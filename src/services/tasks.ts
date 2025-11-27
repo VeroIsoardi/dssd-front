@@ -1,6 +1,7 @@
 import { Task } from '@/types/task'
 import { API_CONFIG } from '@/lib/constants'
 import { getToken } from '@/services/auth'
+import { handleApiError } from '@/lib/api-client'
 
 export interface CreateTaskPayload {
   name: string
@@ -47,6 +48,12 @@ export const taskService = {
       )
       
       if (!response.ok) {
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          handleApiError(response)
+          throw new TaskApiError('No autorizado - redirigiendo al login', 401)
+        }
+
         let errorMessage = 'Error al obtener las tareas'
         let errorDetails: ApiError | undefined
         
@@ -60,7 +67,12 @@ export const taskService = {
         throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
       }
       
-      return response.json()
+      const result = await response.json()
+      console.log('Tasks API response:', result)
+      // Handle different response formats: { data: Task[] } or Task[]
+      const tasks = Array.isArray(result) ? result : (result.data || [])
+      console.log('Parsed tasks:', tasks)
+      return tasks
     } catch (error) {
       if (error instanceof TaskApiError) throw error
       throw new TaskApiError('Error al obtener las tareas', 500)
@@ -78,6 +90,12 @@ export const taskService = {
       if (!response.ok) {
         if (response.status === 404) return null
         
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          handleApiError(response)
+          throw new TaskApiError('No autorizado - redirigiendo al login', 401)
+        }
+
         let errorMessage = 'Error al obtener la tarea'
         try {
           const errorDetails = await response.json()
@@ -96,99 +114,5 @@ export const taskService = {
     }
   },
 
-  // Create new tasks for a project
-  create: async (projectId: string, tasks: CreateTaskPayload[]): Promise<Task[]> => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks`,
-        {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(tasks)
-        }
-      )
-      
-      if (!response.ok) {
-        let errorMessage = 'Error al crear las tareas'
-        let errorDetails: ApiError | undefined
-        
-        try {
-          errorDetails = await response.json()
-          errorMessage = errorDetails?.message || errorMessage
-        } catch {
-          errorMessage = `Error ${response.status}: ${response.statusText}`
-        }
-        
-        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
-      }
-      
-      return response.json()
-    } catch (error) {
-      if (error instanceof TaskApiError) throw error
-      throw new TaskApiError('Error al crear las tareas', 500)
-    }
-  },
 
-  // Update an existing task
-  update: async (projectId: string, taskId: string, task: Partial<CreateTaskPayload>): Promise<Task> => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks/${taskId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(task)
-        }
-      )
-      
-      if (!response.ok) {
-        let errorMessage = 'Error al actualizar la tarea'
-        let errorDetails: ApiError | undefined
-        
-        try {
-          errorDetails = await response.json()
-          errorMessage = errorDetails?.message || errorMessage
-        } catch {
-          errorMessage = `Error ${response.status}: ${response.statusText}`
-        }
-        
-        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
-      }
-      
-      return response.json()
-    } catch (error) {
-      if (error instanceof TaskApiError) throw error
-      throw new TaskApiError('Error al actualizar la tarea', 500)
-    }
-  },
-
-  // Delete a task
-  delete: async (projectId: string, taskId: string): Promise<void> => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks/${taskId}`,
-        {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        }
-      )
-      
-      if (!response.ok) {
-        let errorMessage = 'Error al eliminar la tarea'
-        let errorDetails: ApiError | undefined
-        
-        try {
-          errorDetails = await response.json()
-          errorMessage = errorDetails?.message || errorMessage
-        } catch {
-          errorMessage = `Error ${response.status}: ${response.statusText}`
-        }
-        
-        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
-      }
-    } catch (error) {
-      if (error instanceof TaskApiError) throw error
-      throw new TaskApiError('Error al eliminar la tarea', 500)
-    }
-  }
 }

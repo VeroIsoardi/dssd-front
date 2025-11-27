@@ -39,7 +39,7 @@ export interface Project {
   startDate: string
   endDate: string
   tasks: Task[]
-  status: 'draft' | 'active' | 'completed' | 'cancelled'
+  status: 'draft' | 'active' | 'completed'
   createdAt: string
   updatedAt: string
   userId: string

@@ -11,16 +11,16 @@ export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No tasks found.
+        No hay tareas disponibles que coincidan con los criterios seleccionados.
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {tasks.map((task) => (
+      {tasks.map((task, index) => (
         <TaskCard
-          key={task.id}
+          key={task.id || `task-${index}`}
           task={task}
           onEdit={onEdit ? () => onEdit(task) : undefined}
           onDelete={onDelete ? () => onDelete(task) : undefined}

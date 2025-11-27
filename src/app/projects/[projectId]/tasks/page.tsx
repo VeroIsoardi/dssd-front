@@ -1,27 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { use, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Task } from '@/types/task'
 import { taskService, TaskApiError } from '@/services/tasks'
 import { TaskList } from '@/components/tasks/task-list'
-import { Button } from '@/components/ui/button'
 import { LoadingState } from '@/components/ui/loading-state'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function TasksPage({
   params
 }: {
-  params: { projectId: string }
+  params: Promise<{ projectId: string }>
 }) {
+  const { projectId } = use(params)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     const loadTasks = async () => {
       try {
-        const data = await taskService.getAll(params.projectId)
+        const data = await taskService.getAll(projectId)
         setTasks(data)
       } catch (error) {
         console.error('Error loading tasks:', error)
@@ -38,57 +37,42 @@ export default function TasksPage({
     }
 
     loadTasks()
-  }, [params.projectId])
+  }, [projectId])
 
-  const handleEdit = (task: Task) => {
-    router.push(`/projects/${params.projectId}/tasks/${task.id}/edit`)
-  }
-
-  const handleDelete = async (task: Task) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
-      return
-    }
-
-    try {
-      await taskService.delete(params.projectId, task.id)
-      setTasks(prevTasks => 
-        prevTasks.filter(t => t.id !== task.id)
-      )
-      toast.success('Tarea eliminada exitosamente')
-    } catch (error) {
-      console.error('Error deleting task:', error)
-      if (error instanceof TaskApiError) {
-        toast.error('Error al eliminar tarea', {
-          description: error.message
-        })
-      } else {
-        toast.error('Error inesperado al eliminar tarea')
-      }
-    }
-  }
+  const publicTasks = tasks.filter(task => !task.isPrivate)
+  const privateTasks = tasks.filter(task => task.isPrivate)
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8">
         <h1 className="text-2xl font-bold">Tareas</h1>
-        <div className="space-x-4">
-          <Button variant="outline" onClick={() => router.push('/projects')}>
-            Volver a Proyectos
-          </Button>
-          <Button onClick={() => router.push(`/projects/${params.projectId}/tasks/new`)}>
-            Crear nueva tarea
-          </Button>
-        </div>
       </div>
 
       {isLoading ? (
         <LoadingState message="Cargando tareas..." />
       ) : (
-        <TaskList 
-          tasks={tasks}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <Tabs defaultValue="public" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="public">
+              Tareas públicas
+            </TabsTrigger>
+            <TabsTrigger value="private">
+              Tareas privadas
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="public">
+            <TaskList 
+              tasks={publicTasks}
+            />
+          </TabsContent>
+          
+          <TabsContent value="private">
+            <TaskList 
+              tasks={privateTasks}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   )
