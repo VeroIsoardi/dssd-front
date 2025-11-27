@@ -79,7 +79,7 @@ export default function OrganizationProjectDetailPage({
       
       // Reload tasks to update the list
       const tasksData = await taskService.getAll(projectId)
-      setTasks(tasksData.filter(task => !task.isPrivate))
+      setTasks(tasksData)
     } catch (error) {
       console.error('Error taking task:', error)
       if (error instanceof TaskApiError) {
