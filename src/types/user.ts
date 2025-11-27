@@ -12,6 +12,7 @@ export type User = {
   email: string
   document: string | null
   position: string | null
+  userBonita?: string
   roles: number[]
 }
 

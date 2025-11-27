@@ -14,6 +14,7 @@ import { RoleSelect } from '@/components/RoleSelect'
 
 type EditForm = {
   firstName: string
+  userBonita?: string
   lastName: string
 }
 
@@ -32,7 +33,7 @@ export default function EditUserPage() {
       if (!userId) return
       try {
         const u = await getUser(userId)
-        form.reset({ firstName: u.firstName || '', lastName: u.lastName || '' })
+        form.reset({ firstName: u.firstName || '', lastName: u.lastName || '', userBonita: u.userBonita ?? '' })
         setSelectedRoles(u.roles || [])
       } catch (err) {
         console.error('Load user', err)
@@ -51,7 +52,7 @@ export default function EditUserPage() {
 
   const onSubmit = async (values: EditForm) => {
     try {
-      await updateUser(userId, { firstName: values.firstName, lastName: values.lastName, roles: selectedRoles })
+      await updateUser(userId, { firstName: values.firstName, lastName: values.lastName, roles: selectedRoles, userBonita: values.userBonita })
       toast.success('Usuario actualizado')
       router.push('/users')
     } catch (err) {
@@ -79,6 +80,14 @@ export default function EditUserPage() {
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
                     <Input {...form.register('firstName')} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel>Nombre de usuario de Bonita</FormLabel>
+                  <FormControl>
+                    <Input {...form.register('userBonita')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -123,7 +123,7 @@ export async function changeUserPassword(id: string, payload: ChangePasswordPayl
 }
 export async function updateUser(
   id: string,
-  payload: { firstName: string; lastName: string; roles: number[] }
+  payload: { firstName: string; lastName: string; roles: number[]; userBonita?: string }
 ): Promise<User> {
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
