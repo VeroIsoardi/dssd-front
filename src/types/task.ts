@@ -6,6 +6,7 @@ export interface Task {
   endDate: string
   isFinished: boolean
   projectId: string
+  collaboratorId: string | null
   createdAt: string
   updatedAt: string
   deletedAt: string | null

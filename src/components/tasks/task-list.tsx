@@ -5,9 +5,11 @@ interface TaskListProps {
   tasks: Task[]
   onEdit?: (task: Task) => void
   onDelete?: (task: Task) => void
+  onComplete?: (task: Task) => void
+  onGrab?: (task: Task) => void
 }
 
-export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onDelete, onComplete, onGrab }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -24,6 +26,8 @@ export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
           task={task}
           onEdit={onEdit ? () => onEdit(task) : undefined}
           onDelete={onDelete ? () => onDelete(task) : undefined}
+          onComplete={onComplete ? () => onComplete(task) : undefined}
+          onGrab={onGrab ? () => onGrab(task) : undefined}
         />
       ))}
     </div>

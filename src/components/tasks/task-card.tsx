@@ -8,9 +8,11 @@ interface TaskCardProps {
   task: Task
   onEdit?: () => void
   onDelete?: () => void
+  onComplete?: () => void
+  onGrab?: () => void
 }
 
-export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab }: TaskCardProps) {
   return (
     <Card className="p-4 shadow-sm">
       <div className="flex justify-between items-start">
@@ -25,8 +27,25 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           </div>
           <p className="text-gray-600 mb-4">{task.description}</p>
         </div>
-        {(onEdit || onDelete) && (
+        {(onEdit || onDelete || onComplete || onGrab) && (
           <div className="flex space-x-2 ml-4">
+            {onGrab && !task.collaboratorId && !task.isFinished && (
+              <Button 
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={onGrab}
+              >
+                Tomar Tarea
+              </Button>
+            )}
+            {onComplete && !task.isFinished && (
+              <Button 
+                variant="default"
+                onClick={onComplete}
+              >
+                Completar
+              </Button>
+            )}
             {onEdit && (
               <Button variant="outline" onClick={onEdit}>
                 Editar

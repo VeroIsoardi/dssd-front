@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth'
 import { loginOng as authLogin, registerOng as authRegister, saveToken, getToken, clearToken, saveUserData, getUserData, clearUserData } from '@/services/auth'
@@ -27,6 +28,7 @@ function getDefaultRouteForRole(userRoles: number[]): string {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter()
   const [user, setUser] = useState<AuthResponse['user'] | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearUserData()
     setToken(null)
     setUser(null)
+    router.push('/')
   }
 
   const getDefaultRoute = (): string => {

@@ -200,4 +200,40 @@ export const taskService = {
     }
   },
 
+  // Grab/assign a task to the current user
+  grabTask: async (taskId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/tasks/${taskId}/take`,
+        {
+          method: 'POST',
+          headers: getAuthHeaders()
+        }
+      )
+      
+      if (!response.ok) {
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          handleApiError(response)
+          throw new TaskApiError('No autorizado - redirigiendo al login', 401)
+        }
+
+        let errorMessage = 'Error al tomar la tarea'
+        let errorDetails: ApiError | undefined
+        
+        try {
+          errorDetails = await response.json()
+          errorMessage = errorDetails?.message || errorMessage
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`
+        }
+        
+        throw new TaskApiError(errorMessage, response.status, errorDetails?.error)
+      }
+    } catch (error) {
+      if (error instanceof TaskApiError) throw error
+      throw new TaskApiError('Error al tomar la tarea', 500)
+    }
+  },
+
 }

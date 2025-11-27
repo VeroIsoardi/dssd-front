@@ -64,6 +64,52 @@ export default function TasksPage({
     loadPrivateTasks()
   }, [projectId])
 
+  const handleCompleteTask = async (task: Task) => {
+    try {
+      await taskService.finishTask(task.id)
+      toast.success('Tarea completada exitosamente')
+      
+      // Update the task in the local state
+      setPrivateTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.id === task.id ? { ...t, isFinished: true } : t
+        )
+      )
+    } catch (error) {
+      console.error('Error completing task:', error)
+      if (error instanceof TaskApiError) {
+        toast.error('Error al completar la tarea', {
+          description: error.message
+        })
+      } else {
+        toast.error('Error inesperado al completar la tarea')
+      }
+    }
+  }
+
+  const handleGrabTask = async (task: Task) => {
+    try {
+      await taskService.grabTask(task.id)
+      toast.success('Tarea tomada exitosamente')
+      
+      // Remove from public tasks and reload private tasks
+      setPublicTasks(prevTasks => prevTasks.filter(t => t.id !== task.id))
+      
+      // Reload private tasks to show the newly grabbed task
+      const data = await taskService.getAll(projectId, true)
+      setPrivateTasks(data)
+    } catch (error) {
+      console.error('Error grabbing task:', error)
+      if (error instanceof TaskApiError) {
+        toast.error('Error al tomar la tarea', {
+          description: error.message
+        })
+      } else {
+        toast.error('Error inesperado al tomar la tarea')
+      }
+    }
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
@@ -86,6 +132,7 @@ export default function TasksPage({
           ) : (
             <TaskList 
               tasks={publicTasks}
+              onGrab={handleGrabTask}
             />
           )}
         </TabsContent>
@@ -96,6 +143,7 @@ export default function TasksPage({
           ) : (
             <TaskList 
               tasks={privateTasks}
+              onComplete={handleCompleteTask}
             />
           )}
         </TabsContent>
