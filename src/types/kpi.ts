@@ -5,5 +5,5 @@ export interface KPIData {
   unTakenTasks: number
   pendingTasks: number
   finishedTasks: number
-  topCountries: Array<{ country: string; count: number }>
+  topCountries: Array<{ country: string; count: string | number }>
 }

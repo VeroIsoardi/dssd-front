@@ -229,8 +229,8 @@ export default function DashboardPage() {
                       <YAxis dataKey="country" type="category" width={100} />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="projects" fill="#3b82f6" name="Proyectos">
-                        {kpiData.topCountries.map((entry: { country: string; count: number }, index: number) => (
+                      <Bar dataKey="count" fill="#3b82f6" name="Proyectos">
+                        {kpiData.topCountries.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COUNTRY_COLORS[index % COUNTRY_COLORS.length]} />
                         ))}
                       </Bar>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                   <div className="mt-4 text-center">
                     <p className="text-sm text-gray-600">
                       Total de Proyectos: <span className="font-bold">
-                        {kpiData.topCountries.reduce((acc: number, item: { country: string; count: number }) => acc + item.count, 0)}
+                        {kpiData.topCountries.reduce((acc, item) => acc + (typeof item.count === 'string' ? parseInt(item.count) : item.count), 0)}
                       </span>
                     </p>
                   </div>
