@@ -19,6 +19,8 @@ export default function TasksPage({
   const [isLoadingPublic, setIsLoadingPublic] = useState(true)
   const [isLoadingPrivate, setIsLoadingPrivate] = useState(true)
   const [activeTab, setActiveTab] = useState('public')
+  const [grabbingTaskId, setGrabbingTaskId] = useState<string | null>(null)
+  const [completingTaskId, setCompletingTaskId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadPublicTasks = async () => {
@@ -65,6 +67,7 @@ export default function TasksPage({
   }, [projectId])
 
   const handleCompleteTask = async (task: Task) => {
+    setCompletingTaskId(task.id)
     try {
       await taskService.finishTask(task.id, task.projectId)
       toast.success('Tarea completada exitosamente')
@@ -84,10 +87,13 @@ export default function TasksPage({
       } else {
         toast.error('Error inesperado al completar la tarea')
       }
+    } finally {
+      setCompletingTaskId(null)
     }
   }
 
   const handleGrabTask = async (task: Task) => {
+    setGrabbingTaskId(task.id)
     try {
       await taskService.grabTask(task.id, projectId)
       toast.success('Tarea tomada exitosamente')
@@ -107,6 +113,8 @@ export default function TasksPage({
       } else {
         toast.error('Error inesperado al tomar la tarea')
       }
+    } finally {
+      setGrabbingTaskId(null)
     }
   }
 
@@ -133,6 +141,7 @@ export default function TasksPage({
             <TaskList 
               tasks={publicTasks}
               onGrab={handleGrabTask}
+              grabbingTaskId={grabbingTaskId}
             />
           )}
         </TabsContent>
@@ -144,6 +153,7 @@ export default function TasksPage({
             <TaskList 
               tasks={privateTasks}
               onComplete={handleCompleteTask}
+              completingTaskId={completingTaskId}
             />
           )}
         </TabsContent>

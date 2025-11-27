@@ -2,6 +2,7 @@ import { Task } from '@/types/task'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/utils/format'
 
 interface TaskCardProps {
@@ -10,9 +11,11 @@ interface TaskCardProps {
   onDelete?: () => void
   onComplete?: () => void
   onGrab?: () => void
+  isGrabbing?: boolean
+  isCompleting?: boolean
 }
 
-export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab, isGrabbing, isCompleting }: TaskCardProps) {
   return (
     <Card className="p-4 shadow-sm">
       <div className="flex justify-between items-start">
@@ -33,16 +36,32 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab }: TaskCar
               <Button 
                 variant="default"
                 onClick={onGrab}
+                disabled={isGrabbing}
               >
-                Tomar Tarea
+                {isGrabbing ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Tomando...
+                  </>
+                ) : (
+                  'Tomar Tarea'
+                )}
               </Button>
             )}
             {onComplete && !task.isFinished && (
               <Button 
                 variant="default"
                 onClick={onComplete}
+                disabled={isCompleting}
               >
-                Completar
+                {isCompleting ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Completando...
+                  </>
+                ) : (
+                  'Completar'
+                )}
               </Button>
             )}
             {onEdit && (

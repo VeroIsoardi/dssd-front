@@ -7,9 +7,11 @@ interface TaskListProps {
   onDelete?: (task: Task) => void
   onComplete?: (task: Task) => void
   onGrab?: (task: Task) => void
+  grabbingTaskId?: string | null
+  completingTaskId?: string | null
 }
 
-export function TaskList({ tasks, onEdit, onDelete, onComplete, onGrab }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onDelete, onComplete, onGrab, grabbingTaskId, completingTaskId }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -28,6 +30,8 @@ export function TaskList({ tasks, onEdit, onDelete, onComplete, onGrab }: TaskLi
           onDelete={onDelete ? () => onDelete(task) : undefined}
           onComplete={onComplete ? () => onComplete(task) : undefined}
           onGrab={onGrab ? () => onGrab(task) : undefined}
+          isGrabbing={grabbingTaskId === task.id}
+          isCompleting={completingTaskId === task.id}
         />
       ))}
     </div>
