@@ -165,13 +165,16 @@ export const taskService = {
   },
 
   // Mark a task as finished
-  finishTask: async (taskId: string): Promise<void> => {
+  finishTask: async (taskId: string, projectId?: string): Promise<void> => {
     try {
+      const body = projectId ? JSON.stringify({ projectId }) : undefined
+      
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/tasks/${taskId}/finish`,
         {
           method: 'POST',
-          headers: getAuthHeaders()
+          headers: getAuthHeaders(),
+          body
         }
       )
       

@@ -66,7 +66,7 @@ export default function TasksPage({
 
   const handleCompleteTask = async (task: Task) => {
     try {
-      await taskService.finishTask(task.id)
+      await taskService.finishTask(task.id, task.projectId)
       toast.success('Tarea completada exitosamente')
       
       // Update the task in the local state

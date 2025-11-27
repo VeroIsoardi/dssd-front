@@ -38,10 +38,10 @@ export default function CompromisesPage() {
     loadTasks()
   }, [])
 
-  const handleFinishTask = async (taskId: string) => {
+  const handleFinishTask = async (taskId: string, projectId: string) => {
     setLoadingTaskId(taskId)
     try {
-      await taskService.finishTask(taskId)
+      await taskService.finishTask(taskId, projectId)
       toast.success('Tarea completada exitosamente')
       // Reload tasks to update the UI
       await loadTasks()
@@ -136,7 +136,7 @@ export default function CompromisesPage() {
                       <div className="pt-4 border-t">
                         <Button 
                           className="w-full"
-                          onClick={() => handleFinishTask(task.id)}
+                          onClick={() => handleFinishTask(task.id, task.project.id)}
                           disabled={loadingTaskId === task.id}
                         >
                           {loadingTaskId === task.id ? 'Completando...' : 'Marcar como Completada'}
