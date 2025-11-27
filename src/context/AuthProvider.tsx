@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth'
-import { login as authLogin, register as authRegister, saveToken, getToken, clearToken, saveUserData, getUserData, clearUserData } from '@/services/auth'
+import { loginOng as authLogin, registerOng as authRegister, saveToken, getToken, clearToken, saveUserData, getUserData, clearUserData } from '@/services/auth'
 import { USER_ROLES, hasRole } from '@/lib/constants/roles'
 
 type AuthContextValue = {
@@ -17,6 +17,7 @@ type AuthContextValue = {
 }
 
 function getDefaultRouteForRole(userRoles: number[]): string {
+  if (hasRole(userRoles, USER_ROLES.ADMIN)) return '/users'
   if (hasRole(userRoles, USER_ROLES.ONG)) return '/projects'
   if (hasRole(userRoles, USER_ROLES.ORGANIZATION)) return '/compromises'
   if (hasRole(userRoles, USER_ROLES.DIRECTOR)) return '/dashboard'
