@@ -141,9 +141,9 @@ export default function ProjectsPage() {
                         onClick={() => handleFinishProject(project.id)}
                         className="w-full"
                         variant="secondary"
-                        disabled={project.status === 'completed'}
+                        disabled={project.canBeFinished === false }
                       >
-                        {project.status === 'completed' ? 'Finalizado' : 'Marcar como finalizado'}
+                        { 'Marcar como finalizado'}
                       </Button>
                     </div>
                   </div>

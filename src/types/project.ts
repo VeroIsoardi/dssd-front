@@ -43,4 +43,5 @@ export interface Project {
   createdAt: string
   updatedAt: string
   userId: string
+  canBeFinished?: boolean
 }
