@@ -1,7 +1,6 @@
 import { fetchWithAuth } from '@/lib/api-client'
 import { KPIData } from '@/types/kpi'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+import { API_CONFIG } from '@/lib/constants'
 
 export class KPIApiError extends Error {
   constructor(message: string, public statusCode?: number) {
@@ -15,7 +14,7 @@ export class KPIApiError extends Error {
  */
 export async function getKPIs(): Promise<KPIData> {
   try {
-    const response = await fetchWithAuth(`${API_URL}/kpis`)
+    const response = await fetchWithAuth(`${API_CONFIG.BASE_URL}/kpis`)
 
     if (!response.ok) {
       if (response.status === 404) {
