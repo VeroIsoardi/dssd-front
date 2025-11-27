@@ -30,7 +30,7 @@ export default function UserFormPage() {
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
+    defaultValues: { firstName: "", lastName: "", email: "", password: "", userBonita: "" },
   });
 
   const onSubmit = async (values: RegisterForm) => {
@@ -41,6 +41,7 @@ export default function UserFormPage() {
         lastName: values.lastName,
         password: values.password,
         roles: selectedRoles,
+        userBonita: values.userBonita,
       });
 
       toast.success("Usuario creado");
@@ -56,7 +57,7 @@ export default function UserFormPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Crear Usuario
+            Crear usuario
           </h1>
           <p className="text-gray-600">Crea un nuevo usuario del sistema</p>
         </div>
@@ -95,6 +96,14 @@ export default function UserFormPage() {
                 </FormItem>
 
                 <FormItem>
+                  <FormLabel>Nombre de usuario de Bonita</FormLabel>
+                  <FormControl>
+                    <Input {...form.register("userBonita")} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+
+                <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <Input type="password" {...form.register("password")} />
@@ -114,7 +123,7 @@ export default function UserFormPage() {
                 </FormItem>
 
                 <div className="flex justify-end">
-                  <Button type="submit">Crear Usuario</Button>
+                  <Button type="submit">Crear usuario</Button>
                 </div>
               </form>
             </Form>

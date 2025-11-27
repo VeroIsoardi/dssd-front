@@ -29,6 +29,7 @@ export type CreateUserPayload = {
   lastName: string
   password: string
   roles: number[]
+  userBonita?: string
 }
 
 export type ChangePasswordPayload = {

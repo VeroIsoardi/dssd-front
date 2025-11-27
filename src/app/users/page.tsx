@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-// removed useRouter; opening edit/create in a new tab instead
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import RequireAuth from '@/components/auth/RequireAuth'
 import { getRoleName, USER_ROLES } from '@/lib/constants/roles'
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { formatDate } from '@/lib/utils/format'
 
 export default function UsersPage() {
+  const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [passwordEditingUser, setPasswordEditingUser] = useState<string | null>(null)
@@ -41,12 +42,6 @@ export default function UsersPage() {
 
     load()
   }, [])
-
-  const handleOpenPassword = (userId: string) => {
-    setPasswordEditingUser(userId)
-    setPasswordValue('')
-    setRepeatPasswordValue('')
-  }
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('¿Seguro que desea eliminar este usuario?')) return
@@ -89,7 +84,7 @@ export default function UsersPage() {
             <p className="text-gray-600 mt-2">Lista de usuarios registrados</p>
           </div>
           <div className="flex items-center space-x-2">
-            <Button onClick={() => window.open('/user-form', '_blank')}>Crear Usuario</Button>
+            <Button onClick={() => router.push('/user-form')}>Crear usuario</Button>
           </div>
         </div>
 
@@ -108,6 +103,7 @@ export default function UsersPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bonita</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -118,11 +114,12 @@ export default function UsersPage() {
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{u.firstName} {u.lastName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.userBonita || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getRoleName(u.roles)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.createdAt ? formatDate(u.createdAt) : '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end items-center space-x-2">
-                        <Button variant="outline" onClick={() => window.open(`/user-form/${u.id}`, '_blank')}>Editar</Button>
+                        <Button variant="outline" onClick={() => router.push(`/user-form/${u.id}`)}>Editar</Button>
                         <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteUser(u.id)}>Eliminar</Button>
                       </div>
 
