@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { getProjects, ProjectApiError } from '@/services/projects'
+import { getProjects, finishProject, ProjectApiError } from '@/services/projects'
 import { Project } from '@/types/project'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,6 +41,26 @@ export default function ProjectsPage() {
 
   const handleViewTasks = (projectId: string) => {
     router.push(`/projects/${projectId}/tasks`)
+  }
+
+  const handleFinishProject = async (projectId: string) => {
+    try {
+      await finishProject(projectId)
+      toast.success('Proyecto finalizado exitosamente')
+      
+      // Reload projects to reflect the change
+      const data = await getProjects()
+      setProjects(data)
+    } catch (error) {
+      console.error('Error finishing project:', error)
+      if (error instanceof ProjectApiError) {
+        toast.error('Error al finalizar el proyecto', {
+          description: error.message
+        })
+      } else {
+        toast.error('Error inesperado al finalizar el proyecto')
+      }
+    }
   }
 
   const renderStatusBadge = (status: string) => {
@@ -118,11 +138,12 @@ export default function ProjectsPage() {
                         Ver tareas
                       </Button>
                       <Button 
+                        onClick={() => handleFinishProject(project.id)}
                         className="w-full"
                         variant="secondary"
-                        disabled
+                        disabled={project.status === 'completed'}
                       >
-                        Marcar como finalizado
+                        {project.status === 'completed' ? 'Finalizado' : 'Marcar como finalizado'}
                       </Button>
                     </div>
                   </div>

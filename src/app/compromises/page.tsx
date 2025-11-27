@@ -10,7 +10,6 @@ import { LoadingState } from '@/components/ui/loading-state'
 import { formatDate } from '@/lib/utils/format'
 import { taskService, TaskApiError } from '@/services/tasks'
 import { AssignedTask } from '@/types/task'
-import { Badge } from '@/components/ui/badge'
 
 export default function CompromisesPage() {
   const [tasks, setTasks] = useState<AssignedTask[]>([])
@@ -60,21 +59,6 @@ export default function CompromisesPage() {
     }
   }
 
-  const getStatusBadge = (isFinished: boolean) => {
-    if (isFinished) {
-      return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          Completada
-        </Badge>
-      )
-    }
-    return (
-      <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-        En progreso
-      </Badge>
-    )
-  }
-
   return (
     <RequireAuth allowedRoles={[USER_ROLES.ORGANIZATION]}>
       <div className="container mx-auto py-8 px-4">
@@ -106,10 +90,7 @@ export default function CompromisesPage() {
             {tasks.map((task) => (
               <Card key={task.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <CardTitle className="text-lg">{task.name}</CardTitle>
-                    {getStatusBadge(task.isFinished)}
-                  </div>
+                  <CardTitle className="text-lg">{task.name}</CardTitle>
                   <CardDescription className="line-clamp-2">
                     {task.description}
                   </CardDescription>

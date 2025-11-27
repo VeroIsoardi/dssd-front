@@ -14,7 +14,6 @@ import { LoadingState } from '@/components/ui/loading-state'
 import RequireAuth from '@/components/auth/RequireAuth'
 import { formatDate } from '@/lib/utils/format'
 import { USER_ROLES } from '@/lib/constants/roles'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -120,21 +119,6 @@ export default function OrganizationProjectDetailPage({
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const getStatusBadge = (status: Task['status']) => {
-    const statusConfig = {
-      pending: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800' },
-      in_progress: { label: 'En progreso', className: 'bg-orange-100 text-orange-800' },
-      completed: { label: 'Completada', className: 'bg-green-100 text-green-800' }
-    }
-    
-    const config = statusConfig[status]
-    return (
-      <Badge className={`${config.className} hover:${config.className}`}>
-        {config.label}
-      </Badge>
-    )
   }
 
   if (isLoading) {
@@ -283,10 +267,7 @@ export default function OrganizationProjectDetailPage({
                 {tasks.map((task) => (
                   <Card key={task.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <div className="flex justify-between items-start mb-2">
-                        <CardTitle className="text-lg">{task.name}</CardTitle>
-                        {getStatusBadge(task.status)}
-                      </div>
+                      <CardTitle className="text-lg">{task.name}</CardTitle>
                       <CardDescription className="line-clamp-2">
                         {task.description}
                       </CardDescription>
@@ -307,7 +288,7 @@ export default function OrganizationProjectDetailPage({
                           <Button 
                             onClick={() => handleCreateCompromise(task)}
                             className="w-full"
-                            disabled={task.status === 'completed'}
+                            disabled={task.collaboratorId !== null }
                           >
                             Crear Compromiso
                           </Button>
