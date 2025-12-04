@@ -49,7 +49,9 @@ export async function getObservations(reviewId: string): Promise<Observation[]> 
       throw new ObservationApiError(errorMessage, response.status)
     }
     
-    return await response.json()
+    const result = await response.json()
+    // The API returns { data: [...] }, extract the data array
+    return result.data || result
   } catch (error) {
     if (error instanceof ObservationApiError) throw error
     throw new ObservationApiError('Error inesperado al cargar observaciones', 500)
@@ -97,45 +99,6 @@ export async function createObservation(
 }
 
 /**
- * Answer an observation (ONG only)
- */
-export async function answerObservation(
-  projectId: string,
-  observationId: string,
-  payload: AnswerObservationPayload
-): Promise<Observation> {
-  try {
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}/projects/${projectId}/observations/${observationId}/answer`,
-      {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload)
-      }
-    )
-    
-    if (!response.ok) {
-      if (response.status === 401) handleApiError(response)
-      
-      let errorMessage = 'Error al responder observación'
-      try {
-        const errorData = await response.json()
-        errorMessage = errorData?.message || errorMessage
-      } catch {
-        errorMessage = `Error ${response.status}: ${response.statusText}`
-      }
-      
-      throw new ObservationApiError(errorMessage, response.status)
-    }
-    
-    return await response.json()
-  } catch (error) {
-    if (error instanceof ObservationApiError) throw error
-    throw new ObservationApiError('Error inesperado al responder observación', 500)
-  }
-}
-
-/**
  * Mark an observation as completed (ONG only)
  */
 export async function completeObservation(
@@ -144,7 +107,7 @@ export async function completeObservation(
 ): Promise<Observation> {
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/projects/${projectId}/observations/${observationId}/finish`,
+      `${API_CONFIG.BASE_URL}/projects/observations/${observationId}/finish`,
       {
         method: 'POST',
         headers: getAuthHeaders()

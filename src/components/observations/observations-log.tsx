@@ -5,17 +5,15 @@ import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Observation, ObservationStatus } from '@/types/observation'
-import { answerObservation, completeObservation, ObservationApiError } from '@/services/observations'
+import { completeObservation, ObservationApiError } from '@/services/observations'
 import { formatDate } from '@/lib/utils/format'
 import { MessageSquare, CheckCircle2, Clock, User } from 'lucide-react'
 
 interface ObservationsLogProps {
   observations: Observation[]
   projectId: string
-  canAnswer?: boolean
   canComplete?: boolean
   onUpdate?: () => void
 }
@@ -29,39 +27,10 @@ const statusConfig: Record<ObservationStatus, { label: string; variant: 'default
 export function ObservationsLog({ 
   observations, 
   projectId, 
-  canAnswer = false,
   canComplete = false,
   onUpdate 
 }: ObservationsLogProps) {
-  const [answeringId, setAnsweringId] = useState<string | null>(null)
-  const [answerText, setAnswerText] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [completingId, setCompletingId] = useState<string | null>(null)
-
-  const handleAnswer = async (observationId: string) => {
-    if (!answerText.trim()) {
-      toast.error('Por favor ingrese una respuesta')
-      return
-    }
-
-    setIsSubmitting(true)
-    try {
-      await answerObservation(projectId, observationId, { answer: answerText })
-      toast.success('Respuesta enviada')
-      setAnsweringId(null)
-      setAnswerText('')
-      onUpdate?.()
-    } catch (err) {
-      console.error('Error answering observation', err)
-      if (err instanceof ObservationApiError) {
-        toast.error('Error al responder', { description: err.message })
-      } else {
-        toast.error('Error inesperado al responder')
-      }
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const handleComplete = async (observationId: string) => {
     setCompletingId(observationId)
@@ -93,9 +62,14 @@ export function ObservationsLog({
   return (
     <div className="space-y-4">
       {observations.map((observation) => {
-        const statusInfo = statusConfig[observation.status]
+        // Determine status based on API fields
+        const status: ObservationStatus = observation.isFinished 
+          ? 'completed' 
+          : observation.answer 
+            ? 'answered' 
+            : 'pending'
+        const statusInfo = statusConfig[status]
         const StatusIcon = statusInfo.icon
-        const isAnswering = answeringId === observation.id
 
         return (
           <Card key={observation.id} className="shadow-sm">
@@ -122,7 +96,7 @@ export function ObservationsLog({
 
                 {/* Observation Content */}
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-700">{observation.content}</p>
+                  <p className="text-sm text-gray-700">{observation.observation}</p>
                 </div>
 
                 {/* Answer Section */}
@@ -152,18 +126,8 @@ export function ObservationsLog({
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-2">
-                  {canAnswer && observation.status === 'pending' && !isAnswering && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setAnsweringId(observation.id)}
-                    >
-                      Responder
-                    </Button>
-                  )}
-
-                  {canComplete && observation.status === 'answered' && (
+                {canComplete && !observation.isFinished && (
+                  <div className="flex items-center gap-2 pt-2">
                     <Button
                       size="sm"
                       variant="default"
@@ -172,39 +136,6 @@ export function ObservationsLog({
                     >
                       {completingId === observation.id ? 'Completando...' : 'Marcar como Completada'}
                     </Button>
-                  )}
-                </div>
-
-                {/* Answer Form */}
-                {isAnswering && (
-                  <div className="space-y-3 pt-3 border-t">
-                    <Textarea
-                      placeholder="Escribe tu respuesta aquí..."
-                      value={answerText}
-                      onChange={(e) => setAnswerText(e.target.value)}
-                      rows={4}
-                      className="resize-none"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAnswer(observation.id)}
-                        loading={isSubmitting}
-                      >
-                        {isSubmitting ? 'Enviando...' : 'Enviar Respuesta'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setAnsweringId(null)
-                          setAnswerText('')
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
                   </div>
                 )}
               </div>

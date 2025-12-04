@@ -19,7 +19,7 @@ import type { Project } from '@/types/project'
 import type { Task } from '@/types/task'
 import type { Observation } from '@/types/observation'
 import { formatDate } from '@/lib/utils/format'
-import { Calendar, MapPin, ArrowLeft, MessageSquarePlus } from 'lucide-react'
+import { Calendar, MapPin, ArrowLeft, MessageSquarePlus, CheckCircle2 } from 'lucide-react'
 
 export default function DirectorProjectDetailPage() {
   const params = useParams()
@@ -52,11 +52,18 @@ export default function DirectorProjectDetailPage() {
         // Get observations for each review
         console.log('Reviews data received:', reviewsData)
         if (reviewsData && reviewsData.length > 0) {
-            const reviewsWithObservations: Array<{ id: string; observations: Observation[] }> = []
-            for (const review of reviewsData) {
-            const observationsData = await getObservations(review.id)
-            reviewsWithObservations.push({ id: review.id, observations: observationsData })
+          const reviewsWithObservations: Array<{ id: string; observations: Observation[] }> = []
+          for (const review of reviewsData) {
+            try {
+              const observationsData = await getObservations(review.id)
+              console.log(`Observations for review ${review.id}:`, observationsData)
+              reviewsWithObservations.push({ id: review.id, observations: observationsData })
+            } catch (err) {
+              console.error(`Failed to load observations for review ${review.id}`, err)
+              // Still add the review but with empty observations
+              reviewsWithObservations.push({ id: review.id, observations: [] })
             }
+          }
           console.log('Reviews with observations:', reviewsWithObservations)
           setReviews(reviewsWithObservations)
           // Set the first review as active by default
@@ -124,11 +131,11 @@ export default function DirectorProjectDetailPage() {
   // Get the last review (most recent)
   const lastReview = reviews.length > 0 ? reviews[reviews.length - 1] : null
   const lastReviewObservations = lastReview?.observations || []
-  console.log('Reviews:', reviews.length, 'Last review observations:', lastReviewObservations.length)
+  const totalObservations = reviews.reduce((sum, r) => sum + r.observations.length, 0)
+  console.log('Reviews:', reviews.length, 'Total observations:', totalObservations)
   const activeReview = reviews.find(r => r.id === activeReviewId)
   const activeObservations = activeReview?.observations || []
-  const allObservationsCompleted = activeObservations.length > 0 && activeObservations.every(o => o.status === 'completed')
-  const totalObservations = lastReviewObservations.length
+  const allObservationsCompleted = activeObservations.length > 0 && activeObservations.every(o => o.isFinished)
 
   const handleCreateObservation = async () => {
     // Filter out empty observations
@@ -342,12 +349,12 @@ export default function DirectorProjectDetailPage() {
                 <CardTitle>Observaciones del Proyecto</CardTitle>
                 <p className="text-sm text-gray-600 mt-2">
                   {reviews.length === 0 && 'No hay revisiones creadas aún'}
-                  {reviews.length === 1 && 'Revisión del proyecto'}
+                  {reviews.length === 1 && '1 revisión del proyecto'}
                   {reviews.length > 1 && `${reviews.length} revisiones del proyecto`}
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Create New Observations Form - Always visible */}
+                {/* Create New Observations Form - Always visible for Directors */}
                 <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -398,41 +405,87 @@ export default function DirectorProjectDetailPage() {
 
                 <Separator />
 
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-4">
-                    Observaciones
-                  </h3>
-                  {lastReviewObservations.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No hay observaciones en la última revisión</p>
-                  ) : (
-                    <ObservationsLog
-                      observations={lastReviewObservations}
-                      projectId={projectId}
-                      onUpdate={async () => {
-                        // Reload all reviews when any observation is updated
-                        try {
-                          const reviewsData = await getProjectReviews(projectId)
-                          if (reviewsData && reviewsData.length > 0) {
-                            const reviewsWithObservations = await Promise.all(
-                              reviewsData.map(async (review) => {
-                                const observationsData = await getObservations(review.id)
-                                return { id: review.id, observations: observationsData }
-                              })
-                            )
-                            // Set reviews state after all data is fetched
-                            setReviews(reviewsWithObservations)
-                          } else {
-                            // If no reviews, clear the state
-                            setReviews([])
-                          }
-                        } catch (err) {
-                          console.error('Error reloading observations', err)
-                          toast.error('Error al recargar observaciones')
-                        }
-                      }}
-                    />
-                  )}
-                </div>
+                {/* Reviews Tabs */}
+                {reviews.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">No hay revisiones aún. Crea observaciones para comenzar una revisión.</p>
+                ) : (
+                  <Tabs value={activeReviewId || undefined} onValueChange={setActiveReviewId} className="w-full">
+                    <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+                      {reviews.map((review, index) => {
+                        const allCompleted = review.observations.every(o => o.isFinished)
+                        const hasObservations = review.observations.length > 0
+                        return (
+                          <TabsTrigger 
+                            key={review.id} 
+                            value={review.id}
+                            className="flex items-center gap-2"
+                          >
+                            Revisión {reviews.length - index}
+                            {allCompleted && hasObservations && (
+                              <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            )}
+                            <span className="text-xs opacity-70">
+                              ({review.observations.length})
+                            </span>
+                          </TabsTrigger>
+                        )
+                      })}
+                    </TabsList>
+
+                    {reviews.map((review) => {
+                      const allCompleted = review.observations.every(o => o.isFinished)
+                      const hasObservations = review.observations.length > 0
+                      const canFinishReview = allCompleted && hasObservations
+
+                      return (
+                        <TabsContent key={review.id} value={review.id} className="space-y-4">
+                          {/* Finish Review Button - Only for Directors */}
+                          {canFinishReview && (
+                            <div className="flex justify-end">
+                              <Button
+                                onClick={() => handleFinishReview(review.id)}
+                                loading={isFinishingReview === review.id}
+                                variant="default"
+                              >
+                                {isFinishingReview === review.id ? 'Finalizando...' : 'Finalizar Revisión'}
+                              </Button>
+                            </div>
+                          )}
+
+                          {review.observations.length === 0 ? (
+                            <p className="text-center text-gray-500 py-8">No hay observaciones en esta revisión</p>
+                          ) : (
+                            <ObservationsLog
+                              observations={review.observations}
+                              projectId={projectId}
+                              canComplete={false}
+                              onUpdate={async () => {
+                                // Reload all reviews when any observation is updated
+                                try {
+                                  const reviewsData = await getProjectReviews(projectId)
+                                  if (reviewsData && reviewsData.length > 0) {
+                                    const reviewsWithObservations = await Promise.all(
+                                      reviewsData.map(async (review) => {
+                                        const observationsData = await getObservations(review.id)
+                                        return { id: review.id, observations: observationsData }
+                                      })
+                                    )
+                                    setReviews(reviewsWithObservations)
+                                  } else {
+                                    setReviews([])
+                                  }
+                                } catch (err) {
+                                  console.error('Error reloading observations', err)
+                                  toast.error('Error al recargar observaciones')
+                                }
+                              }}
+                            />
+                          )}
+                        </TabsContent>
+                      )
+                    })}
+                  </Tabs>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

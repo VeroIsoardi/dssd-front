@@ -18,7 +18,7 @@ import type { Project } from '@/types/project'
 import type { Task } from '@/types/task'
 import type { Observation } from '@/types/observation'
 import { formatDate } from '@/lib/utils/format'
-import { Calendar, MapPin, ArrowLeft } from 'lucide-react'
+import { Calendar, MapPin, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 export default function OngProjectDetailPage() {
   const params = useParams()
@@ -46,17 +46,23 @@ export default function OngProjectDetailPage() {
 
         // Get observations for each review
         if (reviewsData && reviewsData.length > 0) {
-          const reviewsWithObservations = await Promise.all(
-            reviewsData.map(async (review) => {
+          const reviewsWithObservations: Array<{ id: string; observations: Observation[] }> = []
+          for (const review of reviewsData) {
+            try {
               const observationsData = await getObservations(review.id)
-              return { id: review.id, observations: observationsData }
-            })
-          )
+              reviewsWithObservations.push({ id: review.id, observations: observationsData })
+            } catch (err) {
+              console.error(`Failed to load observations for review ${review.id}`, err)
+              reviewsWithObservations.push({ id: review.id, observations: [] })
+            }
+          }
           setReviews(reviewsWithObservations)
           // Set the first review as active by default
           if (reviewsWithObservations.length > 0) {
             setActiveReviewId(reviewsWithObservations[0].id)
           }
+        } else {
+          setReviews([])
         }
 
         // Get all projects to find project details
@@ -82,15 +88,22 @@ export default function OngProjectDetailPage() {
   }, [projectId])
 
   const handleObservationsUpdate = async () => {
-    if (!activeReviewId) return
-    
     try {
-      const observationsData = await getObservations(activeReviewId)
-      setReviews(prev => prev.map(r => 
-        r.id === activeReviewId ? { ...r, observations: observationsData } : r
-      ))
+      const reviewsData = await getProjectReviews(projectId)
+      if (reviewsData && reviewsData.length > 0) {
+        const reviewsWithObservations = await Promise.all(
+          reviewsData.map(async (review) => {
+            const observationsData = await getObservations(review.id)
+            return { id: review.id, observations: observationsData }
+          })
+        )
+        setReviews(reviewsWithObservations)
+      } else {
+        setReviews([])
+      }
     } catch (err) {
       console.error('Error reloading observations', err)
+      toast.error('Error al recargar observaciones')
     }
   }
 
@@ -255,52 +268,53 @@ export default function OngProjectDetailPage() {
               <CardHeader>
                 <CardTitle>Observaciones del Proyecto</CardTitle>
                 <p className="text-sm text-gray-600 mt-2">
-                  Responde y completa las observaciones realizadas por el director
+                  {reviews.length === 0 && 'No hay revisiones con observaciones aún'}
+                  {reviews.length === 1 && '1 revisión con observaciones'}
+                  {reviews.length > 1 && `${reviews.length} revisiones con observaciones`}
                 </p>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 {reviews.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No hay revisiones con observaciones aún</p>
-                  </div>
+                  <p className="text-center text-gray-500 py-8">No hay revisiones con observaciones aún</p>
                 ) : (
-                  <>
-                    {/* Review Selector - Only show if multiple reviews exist */}
-                    {reviews.length > 1 && (
-                      <div className="flex gap-2 p-3 bg-gray-50 rounded-lg overflow-x-auto">
-                        {reviews.map((review, index) => (
-                          <Button
-                            key={review.id}
-                            onClick={() => setActiveReviewId(review.id)}
-                            variant={activeReviewId === review.id ? 'default' : 'outline'}
-                            size="sm"
+                  <Tabs value={activeReviewId || undefined} onValueChange={setActiveReviewId} className="w-full">
+                    <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+                      {reviews.map((review, index) => {
+                        const allCompleted = review.observations.every(o => o.isFinished)
+                        const hasObservations = review.observations.length > 0
+                        return (
+                          <TabsTrigger 
+                            key={review.id} 
+                            value={review.id}
+                            className="flex items-center gap-2"
                           >
-                            Revisión {index + 1}
-                            <span className="ml-2 text-xs">
+                            Revisión {reviews.length - index}
+                            {allCompleted && hasObservations && (
+                              <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            )}
+                            <span className="text-xs opacity-70">
                               ({review.observations.length})
                             </span>
-                          </Button>
-                        ))}
-                      </div>
-                    )}
+                          </TabsTrigger>
+                        )
+                      })}
+                    </TabsList>
 
-                    {activeReview && (
-                      <>
-                        {reviews.length > 1 && (
-                          <h3 className="text-sm font-medium text-gray-700">
-                            Revisión {reviews.findIndex(r => r.id === activeReviewId) + 1}
-                          </h3>
+                    {reviews.map((review) => (
+                      <TabsContent key={review.id} value={review.id} className="space-y-4">
+                        {review.observations.length === 0 ? (
+                          <p className="text-center text-gray-500 py-8">No hay observaciones en esta revisión</p>
+                        ) : (
+                          <ObservationsLog
+                            observations={review.observations}
+                            projectId={projectId}
+                            canComplete={true}
+                            onUpdate={handleObservationsUpdate}
+                          />
                         )}
-                        <ObservationsLog
-                          observations={activeObservations}
-                          projectId={projectId}
-                          canAnswer={true}
-                          canComplete={true}
-                          onUpdate={handleObservationsUpdate}
-                        />
-                      </>
-                    )}
-                  </>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
                 )}
               </CardContent>
             </Card>

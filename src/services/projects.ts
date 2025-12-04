@@ -308,7 +308,7 @@ export async function finishProject(projectId: string): Promise<void> {
 /**
  * Get reviews for a project
  */
-export async function getProjectReviews(projectId: string): Promise<Array<{ id: string }>> {
+export async function getProjectReviews(projectId: string): Promise<Array<{ id: string; createdAt: string }>> {
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
@@ -345,7 +345,9 @@ export async function getProjectReviews(projectId: string): Promise<Array<{ id: 
       )
     }
 
-    return await response.json()
+    const result = await response.json()
+    // The API returns { data: [...] }, extract the data array
+    return result.data || result
   } catch (error) {
     if (error instanceof ProjectApiError) {
       throw error
@@ -381,7 +383,7 @@ export async function finishReview(reviewId: string): Promise<void> {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/projects/reviews/${reviewId}/finish`,
       {
-        method: 'POST',
+        method: 'PATCH',
         headers
       }
     )

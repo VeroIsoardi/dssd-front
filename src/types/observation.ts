@@ -2,15 +2,14 @@ export type ObservationStatus = 'pending' | 'answered' | 'completed'
 
 export interface Observation {
   id: string
-  projectId: string
-  directorId: string
-  content: string
-  status: ObservationStatus
+  observation: string
+  isFinished: boolean
   answer?: string
-  answeredAt?: string
-  answeredBy?: string
+  endDate?: string | null
   createdAt: string
   updatedAt: string
+  reviewId: string
+  createdById: string
   director?: {
     id: string
     firstName: string
@@ -23,6 +22,8 @@ export interface Observation {
     lastName: string
     email: string
   }
+  // Computed property for UI
+  status?: ObservationStatus
 }
 
 export interface CreateObservationPayload {
