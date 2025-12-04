@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import Link from 'next/link'
 import { Form, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -14,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 export default function LoginForm() {
   const { login, getDefaultRoute } = useAuth()
   const router = useRouter()
+  const [isLoading, setIsLoading] = React.useState(false)
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -21,11 +21,14 @@ export default function LoginForm() {
   })
 
   const onSubmit = async (values: LoginForm) => {
+    setIsLoading(true)
     try {
       await login(values)
       router.push(getDefaultRoute())
     } catch (err: unknown) {
       console.error('Login error', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -53,7 +56,9 @@ export default function LoginForm() {
             </FormItem>
           </div>
 
-          <Button className="w-full mt-4" type="submit">Ingresar</Button>
+          <Button className="w-full mt-4" type="submit" loading={isLoading}>
+            {isLoading ? 'Ingresando...' : 'Ingresar'}
+          </Button>
         </form>
       </Form>
     </div>

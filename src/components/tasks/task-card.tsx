@@ -1,8 +1,6 @@
 import { Task } from '@/types/task'
-import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/utils/format'
 
 interface TaskCardProps {
@@ -20,14 +18,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab, isGrabbin
     <Card className="p-4 shadow-sm">
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-semibold text-lg">{task.name}</h3>
-            <Badge
-              className={task.isFinished ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
-            >
-              {task.isFinished ? 'Completada' : 'Pendiente'}
-            </Badge>
-          </div>
+          <h3 className="font-semibold text-lg mb-2">{task.name}</h3>
           <p className="text-gray-600 mb-4">{task.description}</p>
         </div>
         {(onEdit || onDelete || onComplete || onGrab) && (
@@ -36,32 +27,18 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onGrab, isGrabbin
               <Button 
                 variant="default"
                 onClick={onGrab}
-                disabled={isGrabbing}
+                loading={isGrabbing}
               >
-                {isGrabbing ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    Tomando...
-                  </>
-                ) : (
-                  'Tomar Tarea'
-                )}
+                {isGrabbing ? 'Tomando...' : 'Tomar Tarea'}
               </Button>
             )}
             {onComplete && !task.isFinished && (
               <Button 
                 variant="default"
                 onClick={onComplete}
-                disabled={isCompleting}
+                loading={isCompleting}
               >
-                {isCompleting ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    Completando...
-                  </>
-                ) : (
-                  'Completar'
-                )}
+                {isCompleting ? 'Completando...' : 'Completar'}
               </Button>
             )}
             {onEdit && (

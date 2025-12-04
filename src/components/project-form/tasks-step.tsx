@@ -9,7 +9,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { FormField } from "@/components/ui/form-field"
 import { Switch } from "@/components/ui/switch"
-import { ChevronLeft, Loader2, Plus, Trash2 } from "lucide-react"
+import { ChevronLeft, Plus, Trash2 } from "lucide-react"
 import { ProjectFormData } from "@/lib/validations/project"
 import { MESSAGES } from "@/lib/constants"
 import { formatDateForInput, parseDateFromInput } from "@/lib/utils/date"
@@ -150,20 +150,13 @@ export function TasksStep({
       </div>
 
       <div className="flex justify-between">
-        <Button type="button" onClick={onPrev} variant="outline">
+        <Button type="button" onClick={onPrev} variant="outline" disabled={isLoading}>
           <ChevronLeft className="mr-2 h-4 w-4" />
           Anterior
         </Button>
         
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creando proyecto...
-            </>
-          ) : (
-            "Guardar Proyecto"
-          )}
+        <Button type="submit" loading={isLoading}>
+          {isLoading ? 'Creando proyecto...' : 'Guardar Proyecto'}
         </Button>
       </div>
     </div>

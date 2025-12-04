@@ -11,7 +11,6 @@ import { LoadingState } from '@/components/ui/loading-state'
 import RequireAuth from '@/components/auth/RequireAuth'
 import { formatDate } from '@/lib/utils/format'
 import { USER_ROLES } from '@/lib/constants/roles'
-import { Badge } from '@/components/ui/badge'
 
 export default function OrganizationProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -67,12 +66,7 @@ export default function OrganizationProjectsPage() {
             {projects.map((project) => (
               <Card key={project.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <CardTitle className="text-xl">{project.name}</CardTitle>
-                    <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                      {project.tasks.length} {project.tasks.length === 1 ? 'tarea' : 'tareas'}
-                    </Badge>
-                  </div>
+                  <CardTitle className="text-xl mb-2">{project.name}</CardTitle>
                   <CardDescription className="line-clamp-2">
                     {project.description}
                   </CardDescription>

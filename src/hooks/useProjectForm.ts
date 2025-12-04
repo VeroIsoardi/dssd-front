@@ -1,13 +1,23 @@
 import { useCallback, useState } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray, UseFormReturn, UseFieldArrayReturn } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { projectFormSchema, ProjectFormData } from "@/lib/validations/project"
 import { createProject, ProjectApiError } from "@/services/projects"
 
-const DEFAULT_TASK = { name: "", description: "", startDate: "", endDate: "" }
+const DEFAULT_TASK = { name: "", description: "", startDate: "", endDate: "", isPrivate: false }
 
-export function useProjectForm(onSuccess?: (data: ProjectFormData) => void) {
+export function useProjectForm(onSuccess?: (data: ProjectFormData) => void): {
+  form: UseFormReturn<ProjectFormData>
+  fields: UseFieldArrayReturn<ProjectFormData, "tasks", "id">["fields"]
+  isLoading: boolean
+  currentStep: number
+  handleSubmit: (data: ProjectFormData) => Promise<void>
+  nextStep: () => Promise<void>
+  prevStep: () => void
+  addTask: () => void
+  removeTask: (index: number) => void
+} {
   const [isLoading, setIsLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
 

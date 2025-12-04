@@ -40,6 +40,7 @@ export function Navbar() {
 
     if (hasRole(user.roles, USER_ROLES.DIRECTOR)) {
       items.push({ label: 'Dashboard', path: '/dashboard' })
+      items.push({ label: 'Proyectos', path: '/director-projects' })
     }
 
     return items

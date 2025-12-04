@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingState } from '@/components/ui/loading-state'
 import RequireAuth from '@/components/auth/RequireAuth'
-import { formatDate, getProjectStatus } from '@/lib/utils/format'
+import { formatDate } from '@/lib/utils/format'
 import { USER_ROLES } from '@/lib/constants/roles'
 
 export default function ProjectsPage() {
@@ -63,15 +63,6 @@ export default function ProjectsPage() {
     }
   }
 
-  const renderStatusBadge = (status: string) => {
-    const statusConfig = getProjectStatus(status)
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.className}`}>
-        {statusConfig.label}
-      </span>
-    )
-  }
-
   return (
     <RequireAuth allowedRoles={[USER_ROLES.ONG]}>
       <div className="container mx-auto py-8 px-4">
@@ -104,10 +95,7 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <Card key={project.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <CardTitle className="text-xl">{project.name}</CardTitle>
-                    {renderStatusBadge(project.status)}
-                  </div>
+                  <CardTitle className="text-xl mb-2">{project.name}</CardTitle>
                   <CardDescription className="line-clamp-2">
                     {project.description}
                   </CardDescription>

@@ -5,6 +5,7 @@ export interface Task {
   startDate: string
   endDate: string
   isFinished: boolean
+  isPrivate?: boolean
   projectId: string
   collaboratorId: string | null
   createdAt: string

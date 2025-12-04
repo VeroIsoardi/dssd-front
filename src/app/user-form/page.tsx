@@ -27,6 +27,7 @@ export default function UserFormPage() {
   const [selectedRoles, setSelectedRoles] = useState<number[]>([
     USER_ROLES.ONG,
   ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -34,6 +35,7 @@ export default function UserFormPage() {
   });
 
   const onSubmit = async (values: RegisterForm) => {
+    setIsSubmitting(true);
     try {
       await createUser({
         email: values.email,
@@ -49,6 +51,8 @@ export default function UserFormPage() {
     } catch (err) {
       console.error("Create user error", err);
       toast.error("Error al crear usuario");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -123,7 +127,9 @@ export default function UserFormPage() {
                 </FormItem>
 
                 <div className="flex justify-end">
-                  <Button type="submit">Crear usuario</Button>
+                  <Button type="submit" loading={isSubmitting}>
+                    {isSubmitting ? 'Creando...' : 'Crear usuario'}
+                  </Button>
                 </div>
               </form>
             </Form>

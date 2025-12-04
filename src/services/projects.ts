@@ -176,6 +176,72 @@ export async function createProject(
 }
 
 /**
+ * Fetches a single project by ID
+ * @param projectId - The ID of the project to fetch
+ * @returns Promise with the project
+ */
+export async function getProject(projectId: string): Promise<Project> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+
+    const token = getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROJECTS}/${projectId}`,
+      {
+        method: 'GET',
+        headers,
+      }
+    )
+
+    if (!response.ok) {
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        handleApiError(response)
+        throw new ProjectApiError('No autorizado - redirigiendo al login', 401)
+      }
+
+      let errorMessage: string = 'Failed to fetch project'
+      let errorDetails: ApiError | undefined
+
+      try {
+        errorDetails = await response.json()
+        errorMessage = errorDetails?.message || 'Failed to fetch project'
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
+
+      throw new ProjectApiError(
+        errorMessage,
+        response.status,
+        errorDetails?.error
+      )
+    }
+
+    return await response.json()
+  } catch (error) {
+    if (error instanceof ProjectApiError) {
+      throw error
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ProjectApiError(
+        MESSAGES.ERROR.NETWORK_ERROR,
+        0
+      )
+    }
+
+    throw new ProjectApiError(
+      'Failed to fetch project',
+      500
+    )
+  }
+}
+
+/**
  * Marks a project as finished
  * @param projectId - The ID of the project to finish
  * @returns Promise<void>
@@ -238,3 +304,64 @@ export async function finishProject(projectId: string): Promise<void> {
     )
   }
 }
+
+/**
+ * Get reviews for a project
+ */
+export async function getProjectReviews(projectId: string): Promise<Array<{ id: string }>> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+
+    const token = getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/projects/${projectId}/reviews`,
+      { headers }
+    )
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        handleApiError(response)
+        throw new ProjectApiError('No autorizado - redirigiendo al login', 401)
+      }
+
+      let errorMessage: string = 'Error al obtener las revisiones'
+      let errorDetails: ApiError | undefined
+
+      try {
+        errorDetails = await response.json()
+        errorMessage = errorDetails?.message || 'Error al obtener las revisiones'
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
+
+      throw new ProjectApiError(
+        errorMessage,
+        response.status,
+        errorDetails?.error
+      )
+    }
+
+    return await response.json()
+  } catch (error) {
+    if (error instanceof ProjectApiError) {
+      throw error
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ProjectApiError(
+        MESSAGES.ERROR.NETWORK_ERROR,
+        0
+      )
+    }
+
+    throw new ProjectApiError(
+      'Error al obtener las revisiones',
+      500
+    )
+  }
+}
+

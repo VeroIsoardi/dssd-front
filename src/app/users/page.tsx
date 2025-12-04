@@ -20,6 +20,8 @@ export default function UsersPage() {
   const [passwordEditingUser, setPasswordEditingUser] = useState<string | null>(null)
   const [passwordValue, setPasswordValue] = useState('')
   const [repeatPasswordValue, setRepeatPasswordValue] = useState('')
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
+  const [changingPasswordUserId, setChangingPasswordUserId] = useState<string | null>(null)
 
   
 
@@ -45,6 +47,7 @@ export default function UsersPage() {
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('¿Seguro que desea eliminar este usuario?')) return
+    setDeletingUserId(userId)
     try {
       await deleteUser(userId)
       setUsers(prev => prev.filter(u => u.id !== userId))
@@ -56,6 +59,8 @@ export default function UsersPage() {
       } else {
         toast.error('Error inesperado al eliminar usuario')
       }
+    } finally {
+      setDeletingUserId(null)
     }
   }
 
@@ -65,6 +70,7 @@ export default function UsersPage() {
       return
     }
 
+    setChangingPasswordUserId(userId)
     try {
       await changeUserPassword(userId, { password: passwordValue, repeatPassword: repeatPasswordValue })
       toast.success('Contraseña actualizada')
@@ -72,6 +78,8 @@ export default function UsersPage() {
     } catch (err) {
       console.error('Change password', err)
       toast.error('Error al cambiar la contraseña')
+    } finally {
+      setChangingPasswordUserId(null)
     }
   }
 
@@ -119,8 +127,15 @@ export default function UsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.createdAt ? formatDate(u.createdAt) : '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end items-center space-x-2">
-                        <Button variant="outline" onClick={() => router.push(`/user-form/${u.id}`)}>Editar</Button>
-                        <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteUser(u.id)}>Eliminar</Button>
+                        <Button variant="outline" onClick={() => router.push(`/user-form/${u.id}`)} disabled={deletingUserId === u.id}>Editar</Button>
+                        <Button 
+                          variant="ghost" 
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50" 
+                          onClick={() => handleDeleteUser(u.id)}
+                          loading={deletingUserId === u.id}
+                        >
+                          {deletingUserId === u.id ? 'Eliminando...' : 'Eliminar'}
+                        </Button>
                       </div>
 
                       {passwordEditingUser === u.id && (
@@ -128,8 +143,19 @@ export default function UsersPage() {
                           <Input type="password" placeholder="Nueva contraseña" value={passwordValue} onChange={(e) => setPasswordValue((e.target as HTMLInputElement).value)} />
                           <Input type="password" placeholder="Repetir contraseña" value={repeatPasswordValue} onChange={(e) => setRepeatPasswordValue((e.target as HTMLInputElement).value)} />
                           <div className="flex justify-end space-x-2 mt-2">
-                            <Button onClick={() => handleChangePassword(u.id)}>Guardar</Button>
-                            <Button variant="outline" onClick={() => setPasswordEditingUser(null)}>Cancelar</Button>
+                            <Button 
+                              onClick={() => handleChangePassword(u.id)}
+                              loading={changingPasswordUserId === u.id}
+                            >
+                              {changingPasswordUserId === u.id ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setPasswordEditingUser(null)}
+                              disabled={changingPasswordUserId === u.id}
+                            >
+                              Cancelar
+                            </Button>
                           </div>
                         </div>
                       )}

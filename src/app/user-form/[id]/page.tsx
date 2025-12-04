@@ -25,6 +25,7 @@ export default function EditUserPage() {
 
   const [loading, setLoading] = useState(true)
   const [selectedRoles, setSelectedRoles] = useState<number[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<EditForm>({ defaultValues: { firstName: '', lastName: '' } })
 
@@ -51,6 +52,7 @@ export default function EditUserPage() {
   }, [userId, form])
 
   const onSubmit = async (values: EditForm) => {
+    setIsSubmitting(true);
     try {
       await updateUser(userId, { firstName: values.firstName, lastName: values.lastName, roles: selectedRoles, userBonita: values.userBonita })
       toast.success('Usuario actualizado')
@@ -59,6 +61,8 @@ export default function EditUserPage() {
       console.error('Update user', err)
       if (err instanceof UsersApiError) toast.error('Error al actualizar usuario', { description: err.message })
       else toast.error('Error inesperado al actualizar usuario')
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -109,8 +113,10 @@ export default function EditUserPage() {
                 </FormItem>
 
                 <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => router.push('/users')}>Cancelar</Button>
-                  <Button type="submit">Guardar cambios</Button>
+                  <Button type="button" variant="outline" onClick={() => router.push('/users')} disabled={isSubmitting}>Cancelar</Button>
+                  <Button type="submit" loading={isSubmitting}>
+                    {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+                  </Button>
                 </div>
               </form>
             </Form>

@@ -94,7 +94,7 @@ export function TaskForm(props: FormProps) {
       </FormField>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" loading={isLoading}>
           {isLoading ? 'Guardando...' : 'Guardar Tarea'}
         </Button>
       </div>

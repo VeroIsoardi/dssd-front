@@ -1,4 +1,4 @@
-import { Task, AssignedTask, AssignedTasksResponse } from '@/types/task'
+import { Task, AssignedTasksResponse } from '@/types/task'
 import { API_CONFIG } from '@/lib/constants'
 import { getToken } from '@/services/auth'
 import { handleApiError } from '@/lib/api-client'
@@ -8,6 +8,7 @@ export interface CreateTaskPayload {
   description: string
   startDate: string
   endDate: string
+  isPrivate?: boolean
 }
 
 interface ApiError {
@@ -42,7 +43,8 @@ export const taskService = {
   // Get tasks for a project
   getAll: async (projectId: string, privateTasks: boolean = false): Promise<Task[]> => {
     try {
-      const url = `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks?privateTask=${privateTasks}`
+      const url = `${API_CONFIG.BASE_URL}/projects/${projectId}/tasks${privateTasks ? '?privateTask=true' : ''}`
+      console.log('Fetching tasks from:', url)
       const response = await fetch(
         url,
         { headers: getAuthHeaders() }

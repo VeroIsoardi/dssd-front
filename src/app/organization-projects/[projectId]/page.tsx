@@ -14,12 +14,6 @@ import RequireAuth from '@/components/auth/RequireAuth'
 import { formatDate } from '@/lib/utils/format'
 import { USER_ROLES } from '@/lib/constants/roles'
 
-interface CompromiseFormData {
-  collaboratorName: string
-  collaboratorEmail: string
-  description: string
-}
-
 export default function OrganizationProjectDetailPage({
   params
 }: {
@@ -30,13 +24,6 @@ export default function OrganizationProjectDetailPage({
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState<CompromiseFormData>({
-    collaboratorName: '',
-    collaboratorEmail: '',
-    description: ''
-  })
 
   useEffect(() => {
     const loadData = async () => {
