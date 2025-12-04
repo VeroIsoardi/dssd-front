@@ -119,6 +119,12 @@ export default function ProjectsPage() {
 
                     <div className="pt-4 border-t space-y-2">
                       <Button 
+                        onClick={() => router.push(`/projects/${project.id}`)}
+                        className="w-full"
+                      >
+                        Ver proyecto
+                      </Button>
+                      <Button 
                         onClick={() => handleViewTasks(project.id)}
                         className="w-full"
                         variant="outline"

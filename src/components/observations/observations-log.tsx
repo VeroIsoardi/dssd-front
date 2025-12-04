@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Observation, ObservationStatus } from '@/types/observation'
-import { answerObservation, resolveObservation, ObservationApiError } from '@/services/observations'
+import { answerObservation, completeObservation, ObservationApiError } from '@/services/observations'
 import { formatDate } from '@/lib/utils/format'
 import { MessageSquare, CheckCircle2, Clock, User } from 'lucide-react'
 
@@ -16,27 +16,27 @@ interface ObservationsLogProps {
   observations: Observation[]
   projectId: string
   canAnswer?: boolean
-  canResolve?: boolean
+  canComplete?: boolean
   onUpdate?: () => void
 }
 
 const statusConfig: Record<ObservationStatus, { label: string; variant: 'default' | 'secondary' | 'outline'; icon: typeof Clock }> = {
   pending: { label: 'Pendiente', variant: 'secondary', icon: Clock },
   answered: { label: 'Respondida', variant: 'default', icon: MessageSquare },
-  resolved: { label: 'Resuelta', variant: 'outline', icon: CheckCircle2 }
+  completed: { label: 'Completada', variant: 'outline', icon: CheckCircle2 }
 }
 
 export function ObservationsLog({ 
   observations, 
   projectId, 
   canAnswer = false,
-  canResolve = false,
+  canComplete = false,
   onUpdate 
 }: ObservationsLogProps) {
   const [answeringId, setAnsweringId] = useState<string | null>(null)
   const [answerText, setAnswerText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [resolvingId, setResolvingId] = useState<string | null>(null)
+  const [completingId, setCompletingId] = useState<string | null>(null)
 
   const handleAnswer = async (observationId: string) => {
     if (!answerText.trim()) {
@@ -63,21 +63,21 @@ export function ObservationsLog({
     }
   }
 
-  const handleResolve = async (observationId: string) => {
-    setResolvingId(observationId)
+  const handleComplete = async (observationId: string) => {
+    setCompletingId(observationId)
     try {
-      await resolveObservation(observationId)
-      toast.success('Observación resuelta')
+      await completeObservation(projectId, observationId)
+      toast.success('Observación completada')
       onUpdate?.()
     } catch (err) {
-      console.error('Error resolving observation', err)
+      console.error('Error completing observation', err)
       if (err instanceof ObservationApiError) {
-        toast.error('Error al resolver', { description: err.message })
+        toast.error('Error al completar', { description: err.message })
       } else {
-        toast.error('Error inesperado al resolver')
+        toast.error('Error inesperado al completar')
       }
     } finally {
-      setResolvingId(null)
+      setCompletingId(null)
     }
   }
 
@@ -163,14 +163,14 @@ export function ObservationsLog({
                     </Button>
                   )}
 
-                  {canResolve && observation.status === 'answered' && (
+                  {canComplete && observation.status === 'answered' && (
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleResolve(observation.id)}
-                      loading={resolvingId === observation.id}
+                      onClick={() => handleComplete(observation.id)}
+                      loading={completingId === observation.id}
                     >
-                      {resolvingId === observation.id ? 'Resolviendo...' : 'Marcar como Resuelta'}
+                      {completingId === observation.id ? 'Completando...' : 'Marcar como Completada'}
                     </Button>
                   )}
                 </div>

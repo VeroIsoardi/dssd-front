@@ -365,3 +365,65 @@ export async function getProjectReviews(projectId: string): Promise<Array<{ id: 
   }
 }
 
+/**
+ * Finish a project review (Director only)
+ * All observations must be completed before finishing the review
+ */
+export async function finishReview(reviewId: string): Promise<void> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+
+    const token = getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/projects/reviews/${reviewId}/finish`,
+      {
+        method: 'POST',
+        headers
+      }
+    )
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        handleApiError(response)
+        throw new ProjectApiError('No autorizado - redirigiendo al login', 401)
+      }
+
+      let errorMessage: string = 'Error al finalizar la revisión'
+      let errorDetails: ApiError | undefined
+
+      try {
+        errorDetails = await response.json()
+        errorMessage = errorDetails?.message || 'Error al finalizar la revisión'
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
+
+      throw new ProjectApiError(
+        errorMessage,
+        response.status,
+        errorDetails?.error
+      )
+    }
+  } catch (error) {
+    if (error instanceof ProjectApiError) {
+      throw error
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ProjectApiError(
+        MESSAGES.ERROR.NETWORK_ERROR,
+        0
+      )
+    }
+
+    throw new ProjectApiError(
+      'Error al finalizar la revisión',
+      500
+    )
+  }
+}
+

@@ -20,7 +20,7 @@ export const FORM_CONFIG = {
 
 // API configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
+  BASE_URL: 'https://635ef33402f94fb3183e89424006b93b.loophole.site/api/v1',
   ENDPOINTS: {
     PROJECTS: '/projects',
     COUNTRIES: 'https://restcountries.com/v3.1/all?fields=name,cca2,translations',

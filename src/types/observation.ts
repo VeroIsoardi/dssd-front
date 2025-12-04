@@ -1,4 +1,4 @@
-export type ObservationStatus = 'pending' | 'answered' | 'resolved'
+export type ObservationStatus = 'pending' | 'answered' | 'completed'
 
 export interface Observation {
   id: string
@@ -26,7 +26,7 @@ export interface Observation {
 }
 
 export interface CreateObservationPayload {
-  content: string
+  observations: string[]
 }
 
 export interface AnswerObservationPayload {

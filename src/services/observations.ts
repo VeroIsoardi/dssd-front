@@ -30,7 +30,6 @@ const getAuthHeaders = (): Record<string, string> => {
  */
 export async function getObservations(reviewId: string): Promise<Observation[]> {
   try {
-    const reviewId = '990e8400-e29b-41d4-a716-446655440003';
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/projects/reviews/${reviewId}/observations`,
       { headers: getAuthHeaders() }
@@ -58,12 +57,15 @@ export async function getObservations(reviewId: string): Promise<Observation[]> 
 }
 
 /**
- * Create a new observation for a project
+ * Create new observations for a project
+ * @param projectId - The project ID
+ * @param payload - Object containing array of observation strings
+ * @returns Promise with created observations
  */
 export async function createObservation(
   projectId: string,
   payload: CreateObservationPayload
-): Promise<Observation> {
+): Promise<boolean> {
   try {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/projects/${projectId}/observations`,
@@ -73,11 +75,10 @@ export async function createObservation(
         body: JSON.stringify(payload)
       }
     )
-    
     if (!response.ok) {
       if (response.status === 401) handleApiError(response)
       
-      let errorMessage = 'Error al crear observación'
+      let errorMessage = 'Error al crear observaciones'
       try {
         const errorData = await response.json()
         errorMessage = errorData?.message || errorMessage
@@ -87,11 +88,11 @@ export async function createObservation(
       
       throw new ObservationApiError(errorMessage, response.status)
     }
-    
-    return await response.json()
+
+    return true
   } catch (error) {
     if (error instanceof ObservationApiError) throw error
-    throw new ObservationApiError('Error inesperado al crear observación', 500)
+    throw new ObservationApiError('Error inesperado al crear observaciones', 500)
   }
 }
 
@@ -135,14 +136,15 @@ export async function answerObservation(
 }
 
 /**
- * Mark an observation as resolved/finished
+ * Mark an observation as completed (ONG only)
  */
-export async function resolveObservation(
+export async function completeObservation(
+  projectId: string,
   observationId: string
 ): Promise<Observation> {
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/projects/observations/${observationId}/finish`,
+      `${API_CONFIG.BASE_URL}/projects/${projectId}/observations/${observationId}/finish`,
       {
         method: 'POST',
         headers: getAuthHeaders()
@@ -152,7 +154,7 @@ export async function resolveObservation(
     if (!response.ok) {
       if (response.status === 401) handleApiError(response)
       
-      let errorMessage = 'Error al resolver observación'
+      let errorMessage = 'Error al completar observación'
       try {
         const errorData = await response.json()
         errorMessage = errorData?.message || errorMessage
@@ -166,6 +168,6 @@ export async function resolveObservation(
     return await response.json()
   } catch (error) {
     if (error instanceof ObservationApiError) throw error
-    throw new ObservationApiError('Error inesperado al resolver observación', 500)
+    throw new ObservationApiError('Error inesperado al completar observación', 500)
   }
 }

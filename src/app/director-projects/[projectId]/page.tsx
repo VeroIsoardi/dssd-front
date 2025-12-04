@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getProjects, getProjectReviews, ProjectApiError } from '@/services/projects'
+import { getProjects, getProjectReviews, finishReview, ProjectApiError } from '@/services/projects'
 import { taskService, TaskApiError } from '@/services/tasks'
 import { getObservations, createObservation, ObservationApiError } from '@/services/observations'
 import { ObservationsLog } from '@/components/observations/observations-log'
@@ -28,11 +28,12 @@ export default function DirectorProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
-  const [observations, setObservations] = useState<Observation[]>([])
-  const [reviewId, setReviewId] = useState<string | null>(null)
+  const [reviews, setReviews] = useState<Array<{ id: string; observations: Observation[] }>>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [newObservation, setNewObservation] = useState('')
+  const [newObservations, setNewObservations] = useState<string[]>([''])
   const [isSubmittingObservation, setIsSubmittingObservation] = useState(false)
+  const [isFinishingReview, setIsFinishingReview] = useState<string | null>(null)
+  const [activeReviewId, setActiveReviewId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -40,20 +41,31 @@ export default function DirectorProjectDetailPage() {
 
       try {
         // Get tasks and reviews in parallel
-        const [tasksData, reviews] = await Promise.all([
+        const [tasksData, reviewsData] = await Promise.all([
           taskService.getAll(projectId, false),
           getProjectReviews(projectId)
         ])
         
         setTasks(tasksData)
+        
 
-        // Get observations from the first review if available
-        if (reviews && reviews.length > 0) {
-          const latestReviewId = reviews[0].id
-          setReviewId(latestReviewId)
-          
-          const observationsData = await getObservations(latestReviewId)
-          setObservations(observationsData)
+        // Get observations for each review
+        console.log('Reviews data received:', reviewsData)
+        if (reviewsData && reviewsData.length > 0) {
+            const reviewsWithObservations: Array<{ id: string; observations: Observation[] }> = []
+            for (const review of reviewsData) {
+            const observationsData = await getObservations(review.id)
+            reviewsWithObservations.push({ id: review.id, observations: observationsData })
+            }
+          console.log('Reviews with observations:', reviewsWithObservations)
+          setReviews(reviewsWithObservations)
+          // Set the first review as active by default
+          if (reviewsWithObservations.length > 0) {
+            setActiveReviewId(reviewsWithObservations[0].id)
+          }
+        } else {
+          console.log('No reviews found, setting empty array')
+          setReviews([])
         }
 
         // Get all projects to find project details
@@ -109,43 +121,104 @@ export default function DirectorProjectDetailPage() {
   const totalTasks = tasks.length
   const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
+  // Get the last review (most recent)
+  const lastReview = reviews.length > 0 ? reviews[reviews.length - 1] : null
+  const lastReviewObservations = lastReview?.observations || []
+  console.log('Reviews:', reviews.length, 'Last review observations:', lastReviewObservations.length)
+  const activeReview = reviews.find(r => r.id === activeReviewId)
+  const activeObservations = activeReview?.observations || []
+  const allObservationsCompleted = activeObservations.length > 0 && activeObservations.every(o => o.status === 'completed')
+  const totalObservations = lastReviewObservations.length
+
   const handleCreateObservation = async () => {
-    if (!newObservation.trim()) {
-      toast.error('Por favor ingrese una observación')
+    // Filter out empty observations
+    const validObservations = newObservations.filter(obs => obs.trim())
+    
+    if (validObservations.length === 0) {
+      toast.error('Por favor ingrese al menos una observación')
       return
     }
 
     setIsSubmittingObservation(true)
     try {
-      await createObservation(projectId, { content: newObservation })
-      toast.success('Observación creada')
-      setNewObservation('')
+      // Send observations in the required format
+      await createObservation(projectId, { observations: validObservations })
+      toast.success(`${validObservations.length} observación(es) creada(s)`)
+      setNewObservations([''])
       
-      // Reload observations from the review
-      if (reviewId) {
-        const observationsData = await getObservations(reviewId)
-        setObservations(observationsData)
+      // Reload all reviews because creating observations creates a new review
+      const reviewsData = await getProjectReviews(projectId)
+      console.log('Reviews data after creation:', reviewsData)
+      if (reviewsData && reviewsData.length > 0) {
+        const reviewsWithObservations = await Promise.all(
+          reviewsData.map(async (review) => {
+            const observationsData = await getObservations(review.id)
+            return { id: review.id, observations: observationsData }
+          })
+        )
+        setReviews(reviewsWithObservations)
       }
     } catch (err) {
       console.error('Error creating observation', err)
       if (err instanceof ObservationApiError) {
-        toast.error('Error al crear observación', { description: err.message })
+        toast.error('Error al crear observaciones', { description: err.message })
       } else {
-        toast.error('Error inesperado al crear observación')
+        toast.error('Error inesperado al crear observaciones')
       }
     } finally {
       setIsSubmittingObservation(false)
     }
   }
 
+  const handleAddObservation = () => {
+    setNewObservations([...newObservations, ''])
+  }
+
+  const handleRemoveObservation = (index: number) => {
+    if (newObservations.length > 1) {
+      setNewObservations(newObservations.filter((_, i) => i !== index))
+    }
+  }
+
+  const handleObservationChange = (index: number, value: string) => {
+    const updated = [...newObservations]
+    updated[index] = value
+    setNewObservations(updated)
+  }
+
   const handleObservationsUpdate = async () => {
-    if (!reviewId) return
+    if (!activeReviewId) return
     
     try {
-      const observationsData = await getObservations(reviewId)
-      setObservations(observationsData)
+      const observationsData = await getObservations(activeReviewId)
+      setReviews(prev => prev.map(r => 
+        r.id === activeReviewId ? { ...r, observations: observationsData } : r
+      ))
     } catch (err) {
       console.error('Error reloading observations', err)
+    }
+  }
+
+  const handleFinishReview = async (reviewId: string) => {
+    setIsFinishingReview(reviewId)
+    try {
+      await finishReview(reviewId)
+      toast.success('Revisión finalizada exitosamente')
+      
+      // Reload observations to reflect the change
+      const observationsData = await getObservations(reviewId)
+      setReviews(prev => prev.map(r => 
+        r.id === reviewId ? { ...r, observations: observationsData } : r
+      ))
+    } catch (err) {
+      console.error('Error finishing review', err)
+      if (err instanceof ProjectApiError) {
+        toast.error('Error al finalizar revisión', { description: err.message })
+      } else {
+        toast.error('Error inesperado al finalizar revisión')
+      }
+    } finally {
+      setIsFinishingReview(null)
     }
   }
 
@@ -212,7 +285,7 @@ export default function DirectorProjectDetailPage() {
               Tareas ({totalTasks})
             </TabsTrigger>
             <TabsTrigger value="observations">
-              Observaciones ({observations.length})
+              Observaciones ({totalObservations})
             </TabsTrigger>
           </TabsList>
 
@@ -267,41 +340,98 @@ export default function DirectorProjectDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Observaciones del Proyecto</CardTitle>
+                <p className="text-sm text-gray-600 mt-2">
+                  {reviews.length === 0 && 'No hay revisiones creadas aún'}
+                  {reviews.length === 1 && 'Revisión del proyecto'}
+                  {reviews.length > 1 && `${reviews.length} revisiones del proyecto`}
+                </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Create New Observation Form */}
+                {/* Create New Observations Form - Always visible */}
                 <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <MessageSquarePlus className="h-4 w-4" />
-                    <span>Nueva Observación</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <MessageSquarePlus className="h-4 w-4" />
+                      <span>Nuevas Observaciones</span>
+                    </div>
+                    <Button
+                      onClick={handleAddObservation}
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                    >
+                      Agregar Observación
+                    </Button>
                   </div>
-                  <Textarea
-                    placeholder="Escribe tu observación aquí..."
-                    value={newObservation}
-                    onChange={(e) => setNewObservation(e.target.value)}
-                    rows={4}
-                    className="resize-none"
-                  />
+                  <div className="space-y-3">
+                    {newObservations.map((observation, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Textarea
+                          placeholder={`Observación ${index + 1}...`}
+                          value={observation}
+                          onChange={(e) => handleObservationChange(index, e.target.value)}
+                          rows={3}
+                          className="resize-none flex-1"
+                        />
+                        {newObservations.length > 1 && (
+                          <Button
+                            onClick={() => handleRemoveObservation(index)}
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            className="self-start"
+                          >
+                            ✕
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                   <Button
                     onClick={handleCreateObservation}
                     loading={isSubmittingObservation}
-                    disabled={!newObservation.trim()}
+                    disabled={newObservations.every(obs => !obs.trim())}
                   >
-                    {isSubmittingObservation ? 'Creando...' : 'Crear Observación'}
+                    {isSubmittingObservation ? 'Guardando...' : `Guardar ${newObservations.filter(obs => obs.trim()).length} Observación(es)`}
                   </Button>
                 </div>
 
                 <Separator />
 
-                {/* Observations Log */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-4">Historial de Observaciones</h3>
-                  <ObservationsLog
-                    observations={observations}
-                    projectId={projectId}
-                    canResolve={true}
-                    onUpdate={handleObservationsUpdate}
-                  />
+                  <h3 className="text-sm font-medium text-gray-700 mb-4">
+                    Observaciones
+                  </h3>
+                  {lastReviewObservations.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No hay observaciones en la última revisión</p>
+                  ) : (
+                    <ObservationsLog
+                      observations={lastReviewObservations}
+                      projectId={projectId}
+                      onUpdate={async () => {
+                        // Reload all reviews when any observation is updated
+                        try {
+                          const reviewsData = await getProjectReviews(projectId)
+                          if (reviewsData && reviewsData.length > 0) {
+                            const reviewsWithObservations = await Promise.all(
+                              reviewsData.map(async (review) => {
+                                const observationsData = await getObservations(review.id)
+                                return { id: review.id, observations: observationsData }
+                              })
+                            )
+                            // Set reviews state after all data is fetched
+                            setReviews(reviewsWithObservations)
+                          } else {
+                            // If no reviews, clear the state
+                            setReviews([])
+                          }
+                        } catch (err) {
+                          console.error('Error reloading observations', err)
+                          toast.error('Error al recargar observaciones')
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               </CardContent>
             </Card>
